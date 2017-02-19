@@ -25,6 +25,12 @@ show_config_merged = true
 show_config_instances = true
 show_config_parsed = false
 
+########################################
+# Argument parsing
+########################################
+
+
+
 
 ########################################
 # Display banner
@@ -267,7 +273,6 @@ if show_config_merged
 end
 
 
-abort
 
 ########################################
 # Resolve configuration links
