@@ -19,15 +19,23 @@ Vagrant.require_version ">= 1.7.0"
 VAGRANTFILE_API_VERSION = "2"
 require 'yaml'
 
+# Debug variables
+show_banner = true
+show_config_merged = false
+show_config_instances = true
+show_config_parsed = false
+
 
 ########################################
 # Display banner
 ########################################
 
-puts "===================================================="
-puts "==            Welcome on easy-vagrant             =="
-puts "===================================================="
-puts ""
+if show_banner
+  puts "===================================================="
+  puts "==            Welcome on easy-vagrant             =="
+  puts "===================================================="
+  puts ""
+end
 
 
 ########################################
@@ -42,6 +50,7 @@ conf_default = {
 			'provider' => 'libvirt',
 			'prefix' => 'prefix-',
 			'sufix' => '-sufix',
+			'provisionners' => {},
     },
     'flavors' => {
       'micro' => {
@@ -134,7 +143,39 @@ conf_default = {
         }
       }
 		}
-  }
+  },
+  'provisionners' => {
+    'test_shell_script' => {
+      'type' => 'shell',
+      'params' => {
+        'path' => 'conf/shell_script_provisionning.sh',
+        'args' => [
+          'Provisionning',
+          'shell_script',
+          'worked as expected as non root.',
+        ],
+        'privileged' => false,
+      },
+    },
+    'test_shell_cli' => {
+      'type' => 'shell',
+      'params' => {
+        'inline' => 'echo $1 $2 $3 > /tmp/vagrant_provisionning_cli',
+        'args' => [
+          'Provisionning',
+          'shell_cli',
+          'worked as expected as root.',
+        ],
+        'privileged' => true,
+      },
+    },
+    'test_ansible' => {
+      'type' => 'ansible',
+      'params' => {
+        'playbook' => 'conf/playbook.yml',
+      },
+    },
+  },
 }
 
 
@@ -142,11 +183,12 @@ conf_default = {
 # Define functions
 ########################################
 
-def value_is_defined(object, key)
-  #puts "DEBUUUG" , object.class
+def attribute_is_defined(object, key)
+#  puts "DEBUUUG" , object.class
 
   if object.class ==  Hash and object.key?(key)
     value = object[key].to_s
+#  puts "DEBUUUG value" , value
     if value.casecmp("nil") != 0
       return true
     end
@@ -185,8 +227,14 @@ if File.file?('local.yml')
 	conf_merged = merge_recursively(conf_merged, YAML.load_file('local.yml') )
 end
 
-# Dump configuration
-#print YAML::dump(conf_merged)
+
+if show_config_merged 
+  # Dump configuration
+  puts
+  puts "NOTICE: This is the merged raw configuration:"
+  print YAML::dump(conf_merged)
+end
+
 
 
 ########################################
@@ -194,18 +242,20 @@ end
 ########################################
 
 conf_final = {}
-conf_final['providers'] = conf_merged['settings']['providers']
 
 
 # Settings: Boxes
 # =====================
+conf_final['providers'] = conf_merged['settings']['providers']
+
+# Boxes
 conf_merged['settings']['providers'].each do |key, value|
 
   # Get common boxes
   global_boxes = conf_merged['settings']['boxes']
 
   # Get local provider box override
-  if value_is_defined(value, 'boxes')
+  if attribute_is_defined(value, 'boxes')
     provider_boxes = value['boxes']
   else
     provider_boxes = {}
@@ -217,6 +267,7 @@ conf_merged['settings']['providers'].each do |key, value|
 end
 
 
+
 # Instances: flavors, boxes, number
 # =====================
 conf_final['instances'] = {}
@@ -225,8 +276,12 @@ conf_merged['instances'].each do |key, value|
 
   vm_config = {}
 
+
+  # Manage flavors
+  # =====================
+ 
   # Get flavor name
-  if value_is_defined(value, 'flavor')
+  if attribute_is_defined(value, 'flavor')
     # Instance flavor is set
     vm_flavor = value['flavor']
   else
@@ -234,37 +289,112 @@ conf_merged['instances'].each do |key, value|
     vm_flavor = conf_merged['settings']['defaults']['flavor']
   end
 
-  # Define disk
-  if( value_is_defined(value, 'cpu') )
+  # Define cpu
+  if attribute_is_defined(value, 'cpu')
     vm_config['cpu'] = value['cpu']
   else
     vm_config['cpu'] = conf_merged['settings']['flavors'][vm_flavor]['cpu']
   end
 
   # Define memory
-  if( value_is_defined(value, 'memory') )
+  if attribute_is_defined(value, 'memory')
     vm_config['memory'] = vm_config['cpu'] = value['memory']
   else
     vm_config['memory'] = conf_merged['settings']['flavors'][vm_flavor]['memory']
   end
 
   # Define disk
-  if( value_is_defined(value, 'disk') )
+  if attribute_is_defined(value, 'disk')
     vm_config['disk'] = value['disk']
   else
     vm_config['disk'] = conf_merged['settings']['flavors'][vm_flavor]['disk'] 
   end
 
 
+  # Manage flavors
+  # =====================
+ 
   # Define box
-  if( value_is_defined(value, 'box') )
+  if attribute_is_defined(value, 'box')
     vm_config['box'] = value['box']
   else
     vm_config['box'] = conf_merged['settings']['defaults']['box'] 
   end
 
+
+  # Manage provisionners
+  # =====================
+  
+  vm_provisionners = {}
+
+  # Try to merge default and instance providers
+  if conf_merged['settings']['defaults']['provisionners'].class == Hash \
+    and value['provisionners'].class == Hash
+
+    # Merge and override default provisionners with instance provisionners
+    vm_provisionners = merge_recursively( 
+                            conf_merged['settings']['defaults']['provisionners'], 
+                            value['provisionners'])
+
+  elsif conf_merged['settings']['defaults']['provisionners'].class == Hash 
+
+    # Take only default provisionners
+    vm_provisionners = conf_merged['settings']['defaults']['provisionners']
+
+  elsif value['provisionners'].class == Hash
+
+    # Take only instance provsionners
+    vm_provisionners = value['provisionners'].class == Hash
+
+  else
+
+    # No provisionners at all
+    vm_provisionners = {}
+
+  end
+
+
+  # Merge instance provisionners with global provisionners
+  vm_provisionners.each do |name, settings|
+
+    # Check if provisionner exists
+    if conf_merged['provisionners'][name].class == Hash
+      # Check if we need to override object
+      if settings.class != Hash
+        settings = conf_merged['provisionners'][name]
+      else
+        settings = merge_recursively(conf_merged['provisionners'][name], settings)
+      end
+    end
+
+    # Check if provisionners are correctly set
+    if settings.class != Hash
+      puts "ERROR: The provisionner '" + name + "' is not correclty set."
+      abort
+    end
+
+    # Ensure priority attribute is defined, or defaulted to 0
+    if attribute_is_defined(settings, 'priority')
+      settings['priority'] = settings['priority'].to_i
+    else
+      settings['priority'] = 0
+    end
+
+    # Merge the config
+    vm_provisionners[name] = settings
+
+  end
+
+  # Reverse sort provisionners
+  vm_config['provisionners'] = vm_provisionners.sort_by { |name, settings| settings['priority'] }.reverse.to_h
+
+
+
+  # Manage instance number
+  # =====================
+ 
   # Detect how many instances
-  if value_is_defined(value, 'number') and value['number'] > 1
+  if attribute_is_defined(value, 'number') and value['number'] > 1
 
     # Generate the request number of instances
     for number in 1..value['number'] do
@@ -273,21 +403,33 @@ conf_merged['instances'].each do |key, value|
     end
 
   elsif (
-      value_is_defined(value, 'number') \
+      attribute_is_defined(value, 'number') \
       and value['number'] != 0 \
-    ) or not value_is_defined(value, 'number')
+    ) or not attribute_is_defined(value, 'number')
 
     # Write config
     conf_final['instances'][key] = vm_config
   end
 
-
 end
 
-# Print debug
-#print YAML::dump(conf_final)
 
-#abort
+# Final configuration is ready
+# =====================
+
+# Show debugging
+if show_config_instances
+  puts
+  puts "NOTICE: This is the instances configuration:"
+  print YAML::dump(conf_final['instances'])
+end
+
+# Show debugging
+if show_config_parsed
+  puts
+  puts "NOTICE: This is the final configuration:"
+  print YAML::dump(conf_final)
+end
 
 
 
@@ -295,15 +437,15 @@ end
 # Magic business
 ########################################
 
-Vagrant.configure(2) do |config|
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   conf_final['instances'].each do |key, value|
 
     # Display instance config
     # =====================
-    puts "Define instance: " + key
-    print YAML::dump(value)
-    puts ""
+    # puts "Define instance: " + key
+    # print YAML::dump(value)
+    # puts ""
 
 
     # Define instance
@@ -317,6 +459,25 @@ Vagrant.configure(2) do |config|
 
       # Disable synced folders
       instance.vm.synced_folder ".", "/vagrant", :disabled => true
+
+
+      # Provisionners
+      # =====================
+      value['provisionners'].each do |name, settings|
+
+        instance.vm.provision settings['type'] do |s|
+
+          settings['params'].each do |k, v|
+            s.send("#{k}=",v)
+
+          end
+
+          # This is what the above block dynamically do :-D
+          #s.inline = settings['params']['inline']
+          #s.args   = settings['params']['args']
+
+        end
+      end
 
 
       # Provider: Libvirt
