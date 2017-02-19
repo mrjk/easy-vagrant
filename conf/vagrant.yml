@@ -1,0 +1,19 @@
+---
+
+settings:
+  defaults:
+    flavor: tiny
+    box: centos7
+  boxes:
+    mysql: wholebits/centos6-64 
+    nginx: wholebits/centos5-64 
+ 
+instances:
+  web:
+    box: debian8
+    flavor: tiny
+  mysql:
+    number: 1
+  mon:
+    number: 2
+
