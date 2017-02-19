@@ -21,7 +21,7 @@ require 'yaml'
 
 # Debug variables
 show_banner = true
-show_config_merged = false
+show_config_merged = true
 show_config_instances = true
 show_config_parsed = false
 
@@ -32,7 +32,8 @@ show_config_parsed = false
 
 if show_banner
   puts "===================================================="
-  puts "==            Welcome on easy-vagrant             =="
+  puts "==             Welcome on easy-vagrant            =="
+  puts "==                    by mrjk                     =="
   puts "===================================================="
   puts ""
 end
@@ -42,6 +43,10 @@ end
 # Default configuration
 ########################################
 
+# This is the default structure. All of this can
+# be overriden into userland. Do not edit this structure
+# unless you know what you do.
+
 conf_default = {
   'settings' => {
     'defaults' => {
@@ -50,7 +55,10 @@ conf_default = {
 			'provider' => 'libvirt',
 			'prefix' => 'prefix-',
 			'sufix' => '-sufix',
-			'provisionners' => {},
+			'provisionners' => {
+        'test_shell_cli' => {
+          'override' => 'true', 
+        } },
     },
     'flavors' => {
       'micro' => {
@@ -147,6 +155,7 @@ conf_default = {
   'provisionners' => {
     'test_shell_script' => {
       'type' => 'shell',
+      'description' => 'This execute a shell script',
       'params' => {
         'path' => 'conf/shell_script_provisionning.sh',
         'args' => [
@@ -159,6 +168,7 @@ conf_default = {
     },
     'test_shell_cli' => {
       'type' => 'shell',
+      'description' => 'This execute a shell command',
       'params' => {
         'inline' => 'echo $1 $2 $3 > /tmp/vagrant_provisionning_cli',
         'args' => [
@@ -171,6 +181,7 @@ conf_default = {
     },
     'test_ansible' => {
       'type' => 'ansible',
+      'description' => 'This run an Ansible playbook',
       'params' => {
         'playbook' => 'conf/playbook.yml',
       },
@@ -183,12 +194,19 @@ conf_default = {
 # Define functions
 ########################################
 
+# This function checks if a subelement of a
+# hash exists and it is not set to the 'null'
+# string. Returns a boolean.
+
 def attribute_is_defined(object, key)
-#  puts "DEBUUUG" , object.class
 
   if object.class ==  Hash and object.key?(key)
     value = object[key].to_s
-#  puts "DEBUUUG value" , value
+
+    #puts "DEBUG: object" , object.class
+    #puts "DEBUG: key" , value
+    #puts 
+
     if value.casecmp("nil") != 0
       return true
     end
@@ -196,16 +214,30 @@ def attribute_is_defined(object, key)
   return false
 end
 
+
+# This function is used to merge recursively two arrays. The
+# right array always win except when a 'nil' string is found 
+# into the new value. Last point, it will remove all keys with
+# the 'unset' string value. Returns the merged array.
+
 def merge_recursively(a, b)
-    a.merge(b) {|key, a_item, b_item| 
-      if a_item.class == Hash and b_item.class == Hash
-        merge_recursively(a_item, b_item) 
-			#elsif b_item.class == String and b_item.casecmp("nil") != 0
-      #  key = b_item
-			else
-				key = b_item
-      end
-    }
+  a.merge(b) {|key, val_old, val_new| 
+
+    # Check if the new value must be taken into account
+    if val_new.to_s.empty? or val_new.to_s == 'nil' or val_new == {}
+      key = val_old
+  
+    # Check if both values are hashes
+    elsif val_old.class == Hash and val_new.class == Hash
+      merge_recursively(val_old, val_new) 
+
+    # Returns the newer value
+		else
+      key = val_new
+    end
+
+  }.delete_if { |k, v| v.to_s == 'unset' }
+
 end
 
 
@@ -230,12 +262,12 @@ end
 
 if show_config_merged 
   # Dump configuration
-  puts
   puts "NOTICE: This is the merged raw configuration:"
   print YAML::dump(conf_merged)
 end
 
 
+abort
 
 ########################################
 # Resolve configuration links

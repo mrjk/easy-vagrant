@@ -7,7 +7,7 @@ settings:
     box: centos7
     provisionners:
       test_shell_script:
-      test_shell_cli:
+      test_shell_cli: unset
       test_ansible:
   boxes:
     mysql: wholebits/centos6-64 
