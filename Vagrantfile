@@ -21,14 +21,9 @@ require 'yaml'
 
 # Debug variables
 show_banner = true
-show_config_merged = true
+show_config_merged = false
 show_config_instances = true
 show_config_parsed = false
-
-########################################
-# Argument parsing
-########################################
-
 
 
 
@@ -358,6 +353,40 @@ conf_merged['instances'].each do |key, value|
     vm_config['box'] = conf_merged['settings']['defaults']['box'] 
   end
 
+  # Manage ports
+  # =====================
+  vm_config['ports'] = []
+  if attribute_is_defined(value, 'ports')
+
+    value['ports'].each do |port|
+
+      if port.has_key?('guest') and port.has_key?('host') \
+       and port['guest'].to_i > 0 and port['host'].to_i > 0
+
+        # TODO: Check if port is already defined/used and warn user
+
+        p = {}
+        p['guest'] = port['guest'].to_i
+        p['host'] = port['host'].to_i
+
+        if port.has_key?('protocol') \
+          and ( port['protocol'] == 'tcp' or port['protocol'] == 'udp' )
+
+          p['protocol'] = port['protocol']
+
+        else
+          p['protocol'] = 'tcp'
+        end
+
+        vm_config['ports'].push(p)
+
+      end
+    end
+  end
+
+
+ 
+
 
   # Manage provisionners
   # =====================
@@ -527,6 +556,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
         # Override
         o.vm.box = conf_final['providers']['libvirt']['boxes'][value["box"]]
+
+        # open network ports
+        value['ports'].each do |port|
+          o.vm.network 'forwarded_port', guest: port['guest'], host: port['host'], protocol: port['protocol'], auto_correct: true
+        end
+
       end
     
 

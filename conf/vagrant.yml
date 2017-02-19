@@ -41,6 +41,12 @@ instances:
   web:
     box: debian8
     flavor: tiny
+    ports:
+      - guest: 80
+        host: 8080
+        protocol: tcp
+      - guest: 22
+        host: 8022
     provisionners:
       shell_install_python:
         priority: 90
