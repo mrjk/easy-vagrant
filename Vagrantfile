@@ -56,10 +56,7 @@ conf_default = {
 			'provider' => 'libvirt',
 			'prefix' => 'prefix-',
 			'sufix' => '-sufix',
-			'provisionners' => {
-        'test_shell_cli' => {
-          'override' => 'true', 
-        } },
+			'provisionners' => {},
     },
     'flavors' => {
       'micro' => {
@@ -158,13 +155,22 @@ conf_default = {
       'type' => 'shell',
       'description' => 'This execute a shell script',
       'params' => {
-        'path' => 'conf/shell_script_provisionning.sh',
+        'path' => 'conf/scripts/test_script.sh',
         'args' => [
           'Provisionning',
           'shell_script',
           'worked as expected as non root.',
         ],
         'privileged' => false,
+      },
+    },
+    'install_python_for_ansible' => {
+      'type' => 'shell',
+      'priority' => '90',
+      'description' => 'This will install Python on the target',
+      'params' => {
+        'path' => 'conf/scripts/install_python.sh',
+        'privileged' => true,
       },
     },
     'test_shell_cli' => {
@@ -184,7 +190,7 @@ conf_default = {
       'type' => 'ansible',
       'description' => 'This run an Ansible playbook',
       'params' => {
-        'playbook' => 'conf/playbook.yml',
+        'playbook' => 'conf/ansible/playbook.yml',
       },
     },
   },
@@ -216,30 +222,50 @@ def attribute_is_defined(object, key)
 end
 
 
-# This function is used to merge recursively two arrays. The
-# right array always win except when a 'nil' string is found 
-# into the new value. Last point, it will remove all keys with
+# This function is used to merge recursively two hashes. The
+# right array always win except when a '*_unset' key is found 
+# into the new value. If a '*_replace' key is found, the old
+# hash will be discarded.  Last point, it will remove all keys with
 # the 'unset' string value. Returns the merged array.
 
-def merge_recursively(a, b)
-  a.merge(b) {|key, val_old, val_new| 
+def merge_recursively(h, o)
+  # h for hash, and o for override [hash]
 
-    # Check if the new value must be taken into account
-    if val_new.to_s.empty? or val_new.to_s == 'nil' or val_new == {}
-      key = val_old
+  h.merge(o) {|key, val_old, val_new| 
+
+    # This is for debugging ...
+    #print "====> Merge key: ", key, "\n== NEW (", val_new.class ,") : ", val_new, "\n== OLD (" , val_old.class ,") : " , val_old , "\n"
+    
+
+    # TODO: At this stage, there are no lists, but we should plan 
+    #       to support that some days
+
+    if val_old.class == Hash and val_new.class == Hash
+
+      # Get all replace/unset keys to delete
+      to_unset = val_new.select {|k| k.end_with?("_unset") }
+      to_replace = val_new.select {|k| k.end_with?("_replace") }
+
+      # Get a list of key to replace/unset and chomp the suffix
+      to_unset = to_unset.keys.map {|v| v.chomp('_unset') }
+      to_replace = to_replace.keys.map {|v| v.chomp('_replace') }
   
-    # Check if both values are hashes
-    elsif val_old.class == Hash and val_new.class == Hash
+      # Delete the correspondings keys
+      val_old.delete_if {|k| to_replace.include? k or to_unset.include? k }
+      val_new.delete_if {|k| to_unset.include? k }
+
+      # Merge them' all
       merge_recursively(val_old, val_new) 
 
-    # Returns the newer value
 		else
-      key = val_new
+      # Returns the newer value
+      val_new
     end
 
-  }.delete_if { |k, v| v.to_s == 'unset' }
+  }.delete_if {|k, v| k.end_with?('_unset') or k.end_with?('_replace') }
 
 end
+
 
 
 ########################################
@@ -255,6 +281,7 @@ if File.file?('conf/vagrant.yml')
 	conf_merged = merge_recursively(conf_merged, YAML.load_file('conf/vagrant.yml') )
 end
 
+
 # Load user configuration
 if File.file?('local.yml')
 	conf_merged = merge_recursively(conf_merged, YAML.load_file('local.yml') )
@@ -268,7 +295,6 @@ if show_config_merged
 end
 
 
-
 ########################################
 # Resolve configuration links
 ########################################
@@ -278,6 +304,9 @@ conf_final = {}
 
 # Settings: Boxes
 # =====================
+#
+
+
 conf_final['providers'] = conf_merged['settings']['providers']
 
 # Boxes
@@ -393,30 +422,18 @@ conf_merged['instances'].each do |key, value|
   
   vm_provisionners = {}
 
-  # Try to merge default and instance providers
-  if conf_merged['settings']['defaults']['provisionners'].class == Hash \
-    and value['provisionners'].class == Hash
 
-    # Merge and override default provisionners with instance provisionners
-    vm_provisionners = merge_recursively( 
-                            conf_merged['settings']['defaults']['provisionners'], 
-                            value['provisionners'])
-
-  elsif conf_merged['settings']['defaults']['provisionners'].class == Hash 
-
-    # Take only default provisionners
-    vm_provisionners = conf_merged['settings']['defaults']['provisionners']
-
-  elsif value['provisionners'].class == Hash
-
-    # Take only instance provsionners
-    vm_provisionners = value['provisionners'].class == Hash
-
-  else
-
-    # No provisionners at all
+  # Detect which provisionners should be applied on instance
+  if value.has_key?('provisionners_unset')
     vm_provisionners = {}
-
+  elsif value.has_key?('provisionners_replace')
+    vm_provisionners = value['provisionners']
+  elsif value['provisionners'].class == Hash
+    vm_provisionners = merge_recursively(
+      conf_merged['settings']['defaults']['provisionners'],
+      value['provisionners'])
+  else
+    vm_provisionners = {}
   end
 
 
@@ -533,6 +550,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
         instance.vm.provision settings['type'] do |s|
 
+          # TODO: Make this called one time at the end for Ansible
+
           settings['params'].each do |k, v|
             s.send("#{k}=",v)
 
@@ -553,6 +572,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         # instanceure provider
         l.cpus = value["cpu"].to_i
         l.memory = value["memory"].to_i
+        l.nested = true
+        l.volume_cache = 'none'
+        l.keymap = 'en-us'
 
         # Override
         o.vm.box = conf_final['providers']['libvirt']['boxes'][value["box"]]
