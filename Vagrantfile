@@ -53,10 +53,10 @@ conf_default = {
     'defaults' => {
       'flavor' => 'tiny',
       'box' => 'centos7',
-			'provider' => 'libvirt',
-			'prefix' => 'prefix-',
-			'sufix' => '-sufix',
-			'provisionners' => {},
+      'provider' => 'libvirt',
+      'prefix' => 'prefix-',
+      'sufix' => '-sufix',
+      'provisionners' => {},
     },
     'flavors' => {
       'micro' => {
@@ -91,64 +91,64 @@ conf_default = {
       }
     },
     'boxes' => {
-    	'debian8' => 'wholebits/debian8-64',
-    	'debian7' => 'wholebits/debian7-64',
-    	'ubuntu1604' => 'wholebits/ubuntu16.10-64',
-    	'ubuntu1404' => 'wholebits/ubuntu14.04-64',
-    	'centos7' => 'wholebits/centos7',
-    	'centos6' => 'wholebits/centos5-64',
-    	'arch' => 'wholebits/arch-64',
+      'debian8' => 'wholebits/debian8-64',
+      'debian7' => 'wholebits/debian7-64',
+      'ubuntu1604' => 'wholebits/ubuntu16.10-64',
+      'ubuntu1404' => 'wholebits/ubuntu14.04-64',
+      'centos7' => 'wholebits/centos7',
+      'centos6' => 'wholebits/centos5-64',
+      'arch' => 'wholebits/arch-64',
     },
     'providers' => {
       'libvirt' => {
-				'driver' => 'nil',
-				'host' => 'nil',
-				'connect_via_ssh' => 'nil',
-				'username' => 'nil',
-				'password' => 'nil',
-				'id_ssh_key_file' => '~/.ssh/id_rsa',
-				'socket' => 'nil',
-				'uri' => 'nil'
+        'driver' => 'nil',
+        'host' => 'nil',
+        'connect_via_ssh' => 'nil',
+        'username' => 'nil',
+        'password' => 'nil',
+        'id_ssh_key_file' => '~/.ssh/id_rsa',
+        'socket' => 'nil',
+        'uri' => 'nil'
       },
       'virtualbox' => {
-				'instances' => {
-					'linked_clones' => 'true',
-					'execution_cap' => '50',
-					'page_fusion' => 'on',
-					'cpuhotplug' => 'on',
-					'pae' => 'on',
-					'largepages' => 'on',
-					'guestmemoryballoon' => '128',
+        'instances' => {
+          'linked_clones' => 'true',
+          'execution_cap' => '50',
+          'page_fusion' => 'on',
+          'cpuhotplug' => 'on',
+          'pae' => 'on',
+          'largepages' => 'on',
+          'guestmemoryballoon' => '128',
         'boxes' => {
-					'debian8' => 'minimal/jessie64',
-					'debian7' => 'minimal/wheezy64',
-					'ubuntu1604' => 'minimal/xenial64',
-					'ubuntu1404' => 'minimal/trusty64',
-					'centos7' => 'minimal/centos7',
-					'centos6' => 'minimal/centos6',
+          'debian8' => 'minimal/jessie64',
+          'debian7' => 'minimal/wheezy64',
+          'ubuntu1604' => 'minimal/xenial64',
+          'ubuntu1404' => 'minimal/trusty64',
+          'centos7' => 'minimal/centos7',
+          'centos6' => 'minimal/centos6',
         }
-      	},
+        },
       },
       'docker' => {
-				'force_host_vm' => 'false',
-				'pull' => 'false',
-				'remains_running' => 'true',
-				'stop_timeout' => '30',
+        'force_host_vm' => 'false',
+        'pull' => 'false',
+        'remains_running' => 'true',
+        'stop_timeout' => '30',
         'boxes' => {
-					'scratch' => 'scratch',
-					'alpine' => 'alpine:latest',
-					'debian8' => 'debian:8',
-					'debian7' => 'debian:7',
-					'ubuntu1604' => 'ubuntu:xenial',
-					'ubuntu1404' => 'ubuntu:trusty',
-					'ubuntu1204' => 'ubuntu:precise',
-					'centos7' => 'centos:7',
-					'centos6' => 'centos:6',
-					'centos5' => 'centos:5',
-					'arch' => 'archlinuxjp/archlinux'
+          'scratch' => 'scratch',
+          'alpine' => 'alpine:latest',
+          'debian8' => 'debian:8',
+          'debian7' => 'debian:7',
+          'ubuntu1604' => 'ubuntu:xenial',
+          'ubuntu1404' => 'ubuntu:trusty',
+          'ubuntu1204' => 'ubuntu:precise',
+          'centos7' => 'centos:7',
+          'centos6' => 'centos:6',
+          'centos5' => 'centos:5',
+          'arch' => 'archlinuxjp/archlinux'
         }
       }
-		}
+    }
   },
   'provisionners' => {
     'test_shell_script' => {
@@ -257,7 +257,7 @@ def merge_recursively(h, o)
       # Merge them' all
       merge_recursively(val_old, val_new) 
 
-		else
+    else
       # Returns the newer value
       val_new
     end
@@ -278,13 +278,13 @@ conf_merged = conf_default
 
 # Load mainteneur configuration
 if File.file?('conf/vagrant.yml')
-	conf_merged = merge_recursively(conf_merged, YAML.load_file('conf/vagrant.yml') )
+  conf_merged = merge_recursively(conf_merged, YAML.load_file('conf/vagrant.yml') )
 end
 
 
 # Load user configuration
 if File.file?('local.yml')
-	conf_merged = merge_recursively(conf_merged, YAML.load_file('local.yml') )
+  conf_merged = merge_recursively(conf_merged, YAML.load_file('local.yml') )
 end
 
 
