@@ -19,7 +19,7 @@ Vagrant.require_version ">= 1.7.0"
 VAGRANTFILE_API_VERSION = "2"
 require 'yaml'
 
-# Debug variables
+# Internal variables
 show_banner = true
 show_config_merged = false
 show_config_instances = true
@@ -32,11 +32,10 @@ show_config_parsed = false
 ########################################
 
 if show_banner
-  puts "===================================================="
-  puts "==             Welcome on easy-vagrant            =="
-  puts "==                    by mrjk                     =="
-  puts "===================================================="
-  puts ""
+  puts "INFO: ===================================================="
+  puts "INFO: ==             Welcome on easy-vagrant            =="
+  puts "INFO: ==                    by mrjk                     =="
+  puts "INFO: ===================================================="
 end
 
 
@@ -229,42 +228,134 @@ end
 # the 'unset' string value. Returns the merged array.
 
 def merge_recursively(h, o)
-  # h for hash, and o for override [hash]
+  # h for hash, and o for overriding hash
 
-  h.merge(o) {|key, val_old, val_new| 
+  merge_string = '_'
 
-    # This is for debugging ...
-    #print "====> Merge key: ", key, "\n== NEW (", val_new.class ,") : ", val_new, "\n== OLD (" , val_old.class ,") : " , val_old , "\n"
-    
+  # Check if both objects are hashes
+  if h.class == Hash and o.class == Hash
+    h.merge(o) {|key, val_old, val_new|
 
-    # TODO: At this stage, there are no lists, but we should plan 
-    #       to support that some days
+      # Check if there is an action key and options
+      if o.has_key? (key + merge_string)
+        if o[key + merge_string].class == String
+          action = o[key + merge_string]
+        elsif o[key + merge_string].class == Hash
 
-    if val_old.class == Hash and val_new.class == Hash
+          # Check requested action
+          if o[key + merge_string].has_key? ("action") and o[key + merge_string]["action"].class == String
+            action = o[key + merge_string]["action"]
+          else
+            action = 'merge'
+            print "WARN: The action key require to be a string (key: ", key , merge_string , ".action)\n"
+          end
 
-      # Get all replace/unset keys to delete
-      to_unset = val_new.select {|k| k.end_with?("_unset") }
-      to_replace = val_new.select {|k| k.end_with?("_replace") }
+          # Check action options
+          if o[key + merge_string].has_key? ("options")
+            options = o[key + merge_string]["options"]
+          else
+            options = nil
+          end
 
-      # Get a list of key to replace/unset and chomp the suffix
-      to_unset = to_unset.keys.map {|v| v.chomp('_unset') }
-      to_replace = to_replace.keys.map {|v| v.chomp('_replace') }
-  
-      # Delete the correspondings keys
-      val_old.delete_if {|k| to_replace.include? k or to_unset.include? k }
-      val_new.delete_if {|k| to_unset.include? k }
+        end
+      else
+        action = "merge"
+        options = nil
+      end
 
-      # Merge them' all
-      merge_recursively(val_old, val_new) 
+      # This is for debugging ...
+      #print "====> Work on key: ", key, " (", action ,") \n== OLD (", val_old.class ,") : ", YAML::dump(val_old), "\n== NEW (" , val_new.class ,") : " , YAML::dump(val_new) , "\n\n"
+      #print "====> Work on key: ", key, " (", action ,") \n== OLD (", val_old.class ,") : ", val_old, "\n== NEW (" , val_new.class ,") : " , val_new , "\n\n"
 
-    else
-      # Returns the newer value
-      val_new
-    end
+      # Let's do it
+      case action
 
-  }.delete_if {|k, v| k.end_with?('_unset') or k.end_with?('_replace') }
+      when 'replace'
+        # Replace all elements
+        val_new
+
+      when 'unset'
+        # Remove all elements
+        nil
+
+      when 'merge'
+        # Merge all elements
+
+        if val_new.class == Hash and val_old.class == Hash
+          merge_recursively(val_old, val_new)
+        else
+          # Keep old value if newer is not set
+          if val_new == nil
+            val_old
+          else
+            val_new
+          end
+        end
+
+      when 'intersect'
+        # Keep common elements
+
+        if val_new.class == Hash and val_old.class == Hash
+          val_new.keep_if { |k, v| val_old.key? k }
+        else
+          # Keep old value if newer not set
+          if val_new == nil
+            val_old
+          else
+            val_new
+          end
+        end
+
+      when 'complement'
+        # Keep all elements, except those listed
+
+        if val_new.class == Hash and val_old.class == Hash
+          t = merge_recursively(val_old, val_new)
+          # Retrieve options
+          if options.class ==Hash
+            t.delete_if { |k, v| options.key? k }
+          elsif options.class == Array
+            t.delete_if { |k, v| options.include? k }
+          else
+            t
+            print "WARN: Complement action require a Hash or an Array as options (key: ", key , merge_string , ".options)\n"
+          end
+        else
+          val_old
+        end
+
+      when 'difference'
+        # Remove common elements, keep uniques
+
+        if val_new.class == Hash and val_old.class == Hash
+          # Check options type
+          if options.class ==Hash
+            tn = val_new.select { |k, v| not options.key? k }
+            to = val_old.select { |k, v| not options.key? k }
+          elsif options.class == Array
+            tn = val_new.select { |k, v| not options.include? k }
+            to = val_old.select { |k, v| not options.include? k }
+          else
+            tn = val_new
+            to = val_old
+            print "WARN: Difference action require a Hash or an Array as options (key: ", key , merge_string , ".options)\n"
+          end
+          merge_recursively(tn, to)
+        else
+          val_new
+        end
+
+      else
+        print "ERROR: Action '", action ,"'not implemented (key: ", o + "." + key + merge_string , "options)\n"
+      end
+    }.delete_if {|k, v| k.end_with?('_')}
+
+  else
+    o
+  end
 
 end
+
 
 
 
