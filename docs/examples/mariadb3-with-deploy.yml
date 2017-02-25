@@ -1,0 +1,48 @@
+---
+
+# conf/vagrant.yml
+# This example will deploy 3 mariadb servers with a deploy VM. There
+# are different provisionners according the roles of the VMs.
+
+settings:
+  defaults:
+    flavor: tiny
+    box: centos7
+    provisionners:
+      install_epel:
+      install_mariadb:
+
+instances:
+  deploy:
+    box: debian8
+    flavor: micro
+    provisionners:
+      debian_init:
+  db:
+    number: 3
+    ports:
+      - guest: 3306
+        host: 5506
+        protocol: tcp
+      - guest: 22
+        host: 5522
+
+provisionners:
+  debian_init:
+    type: shell
+    priority: 90
+    params:
+      inline: "apt-get update; apt-get install -y screen git htop bash-completion vim"
+  install_epel:
+    type: shell
+    priority: 90
+    params:
+      inline: "yum install -y epel-release"
+  install_mariadb:
+    type: shell
+    priority: 70
+    params:
+      inline: "yum install -y mariadb-server"
+ 
+
+# vim: tabstop=2 softtabstop=0 expandtab shiftwidth=2 smarttab :

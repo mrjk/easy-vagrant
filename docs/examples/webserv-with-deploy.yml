@@ -1,0 +1,34 @@
+---
+
+settings:
+  defaults:
+    flavor: tiny
+    box: centos7
+    provisionners:
+      ansible_centos7:
+      install_python_for_ansible:
+        priority: 90
+
+instances:
+  deploy:
+    box: debian8
+    flavor: micro
+  web:
+    ports:
+      - guest: 80
+        host: 5580
+        protocol: tcp
+      - guest: 22
+        host: 5522
+
+provisionners:
+  ansible_centos7:
+    type: ansible
+    priority: 50
+    params:
+      playbook: conf/ansible/playbook.yml
+      groups:
+        targets:
+          - all
+ 
+# vim: tabstop=2 softtabstop=0 expandtab shiftwidth=2 smarttab :
