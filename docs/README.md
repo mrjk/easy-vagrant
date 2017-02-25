@@ -4,6 +4,23 @@ Easy-vagrant is a vagrant configuration file under steroids. It mainly resolve d
 
 The goal is to be able to spinup very quickly some base OS. à la docker, but with your favorite provider.
 
+``` text
+           .-. 
+ {`:      (o.O)
+  \\       |~| 
+   \\     __|__
+     o===o.=|=.o\
+          .=|=. \\
+          .=|=. ::}  
+           _=_  
+          ( _ )   
+          || ||
+          || ||
+          () ()
+          || ||
+          || ||
+         ==' '== 
+```
 
 
 ----------
@@ -12,14 +29,14 @@ The goal is to be able to spinup very quickly some base OS. à la docker, but wi
 
 ## Features
 - Multi provider support:
-	- Libvirt
-	- VirtualBox
-	- Docker (comming)
+  - Libvirt
+  - VirtualBox
+  - Docker (comming)
 - Easy configuration with yaml
-	- Comes with nifty defaults
-	- Allow a developper configuration
-	- Allow final user to ovverrides some settings to its local environment
-	- No code redondancy
+  - Comes with nifty defaults
+  - Allow a developper configuration
+  - Allow final user to ovverrides some settings to its local environment
+  - No code redondancy
 - Virtually allow any providers within yaml definitions
 - Comes with a preset of base images
 - Everything is customizable
@@ -42,18 +59,37 @@ Initial version:
 To run easy-vagrant, you must have:
 
 - vagrant
-	- vagrant > 1.8
-	- plugins:
-		- ansible
-		- vagrant-libvirt
+  - vagrant > 1.8
+  - plugins:
+    - ansible
+    - vagrant-libvirt
 - Providers:
-	- libvirt: libvirtd
-	- virtualbox: virtualbox
+  - libvirt: libvirtd
+  - virtualbox: virtualbox
 - Provisionners:
-	- ansible: ansible (any versions)
+  - ansible: ansible (any versions)
 
 
 ## Usage
+
+### Boxes
+At this stage, easy-vagrant comes with a preset
+
+
+#### Provisionners
+
+Structure:
+```
+provsionneurs:
+  $provisionner_id:
+    [priority: <integer O to 100, default to 0>]
+    type: Must be one of Vagrant supported provsionner, such as 'shell' or 'ansible' or your_provsionner
+    params: A list of 
+      $param1:
+      $param1:
+      $paramN:
+      
+```
 
 ## Internal
 
@@ -70,9 +106,9 @@ The default configuration inherits configuration to developper configuraiton, an
 In way to make a friendly editable yaml configuration, there were the need of exposing an easy yaml structure for the end user, and a more computer readable configuration for vagrant. The process is the following:
 
 0. The user defines a yaml confikguration with 3 primary keys:
-	1. ```settings```:
-	2. ```instances```: This is literraly 
-	3. ```provisionners```:
+  1. ```settings```:
+  2. ```instances```: This is literraly 
+  3. ```provisionners```:
 
 
 ### Loading order and inheritance
@@ -94,6 +130,22 @@ Developper->None: unset
 User->None: unset
 
 ```
+
+### Expand and override defaults settings
+It is quite easy, just replace the directive with your own content. If it is a hash, it will be merged with the inherited value. Example to expand available boxes:
+```
+settings:
+  boxes:
+    mycustomboxname: mycustombox_url/mycustombox_atlas_id
+```
+To overrides, there is a trick, we need to declare two times the children, the firest one with the unset value, and another time with the new content:
+```
+settings:
+  boxes: unset
+  boxes:
+    mycustomboxname: mycustombox_url/mycustombox_atlas_id
+```
+
 
 ## License
 
