@@ -76,7 +76,7 @@ conf_default = {
       },
       'medium' => {
         'cpu' => '2',
-        'memory' => '2024',
+        'memory' => '2048',
         'disk' => '10'
       },
       'large' => {
@@ -87,7 +87,7 @@ conf_default = {
       'huge' => {
         'cpu' => '4',
         'memory' => '8192',
-        'disk' => '10'
+        'disk' => '20'
       }
     },
     'boxes' => {
@@ -101,14 +101,16 @@ conf_default = {
     },
     'providers' => {
       'libvirt' => {
-        'driver' => 'nil',
-        'host' => 'nil',
-        'connect_via_ssh' => 'nil',
-        'username' => 'nil',
-        'password' => 'nil',
-        'id_ssh_key_file' => '~/.ssh/id_rsa',
-        'socket' => 'nil',
-        'uri' => 'nil'
+        'settings' => {
+          'driver' => 'nil',
+          'host' => 'nil',
+          'connect_via_ssh' => 'nil',
+          'username' => 'nil',
+          'password' => 'nil',
+          'id_ssh_key_file' => '~/.ssh/id_rsa',
+          'socket' => 'nil',
+          'uri' => 'nil'
+        },
       },
       'virtualbox' => {
         'instances' => {
@@ -119,6 +121,7 @@ conf_default = {
           'pae' => 'on',
           'largepages' => 'on',
           'guestmemoryballoon' => '128',
+        },
         'boxes' => {
           'debian8' => 'minimal/jessie64',
           'debian7' => 'minimal/wheezy64',
@@ -127,13 +130,14 @@ conf_default = {
           'centos7' => 'minimal/centos7',
           'centos6' => 'minimal/centos6',
         }
-        },
       },
       'docker' => {
-        'force_host_vm' => 'false',
-        'pull' => 'false',
-        'remains_running' => 'true',
-        'stop_timeout' => '30',
+        'settings' => {
+          'force_host_vm' => 'false',
+          'pull' => 'false',
+          'remains_running' => 'true',
+          'stop_timeout' => '30',
+        },
         'boxes' => {
           'scratch' => 'scratch',
           'alpine' => 'alpine:latest',
@@ -739,10 +743,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         # Override
         o.vm.box = conf_final['providers']['libvirt']['boxes'][value["box"]]
 
-        # open network ports
-        value['ports'].each do |port|
-          o.vm.network 'forwarded_port', guest: port['guest'], host: port['host'], protocol: port['protocol'], auto_correct: true
-        end
 
       end
     
@@ -754,9 +754,17 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         # instanceure provider
         v.customize ["modifyvm", :id, "--cpus", value["cpu"]]
         v.customize ["modifyvm", :id, "--memory", value["memory"]]
+        v.customize ["modifyvm", :id, "--usb", "off"]
+        v.customize ["modifyvm", :id, "--usbehci", "off"]
 
         # Override
         o.vm.box = conf_final['providers']['virtualbox']['boxes'][value["box"]]
+
+        # open network ports
+        value['ports'].each do |port|
+          o.vm.network 'forwarded_port', guest: port['guest'], host: port['host'], protocol: port['protocol'], auto_correct: true
+        end
+
       end
     
 
