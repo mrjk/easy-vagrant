@@ -1,9 +1,9 @@
-# Easy-vagrant default configuration
+# Default configuration
 
-This is the default Easy-vagrant configuration:
-
+There is a dump of the default configuration:
 
 ```
+---
 settings:
   defaults:
     flavor: tiny
@@ -13,11 +13,11 @@ settings:
     sufix: "-sufix"
     provisionners: {}
   flavors:
-    micro:
+    nano:
       cpu: '1'
       memory: '128'
-      disk: '10'
-    tiny:
+      disk: '5'
+    micro:
       cpu: '2'
       memory: '512'
       disk: '10'
@@ -27,16 +27,16 @@ settings:
       disk: '10'
     medium:
       cpu: '2'
-      memory: '2024'
-      disk: '10'
+      memory: '2048'
+      disk: '20'
     large:
       cpu: '3'
       memory: '4096'
-      disk: '10'
-    huge:
+      disk: '30'
+    xlarge:
       cpu: '4'
       memory: '8192'
-      disk: '10'
+      disk: '40'
   boxes:
     debian8: wholebits/debian8-64
     debian7: wholebits/debian7-64
@@ -44,17 +44,18 @@ settings:
     ubuntu1404: wholebits/ubuntu14.04-64
     centos7: wholebits/centos7
     centos6: wholebits/centos5-64
-    arch: wholebits/arch-64
+    archlinux: wholebits/arch-64
   providers:
     libvirt:
-      driver: nil
-      host: nil
-      connect_via_ssh: nil
-      username: nil
-      password: nil
-      id_ssh_key_file: "~/.ssh/id_rsa"
-      socket: nil
-      uri: nil
+      settings:
+        driver: nil
+        host: nil
+        connect_via_ssh: nil
+        username: nil
+        password: nil
+        id_ssh_key_file: "~/.ssh/id_rsa"
+        socket: nil
+        uri: nil
     virtualbox:
       instances:
         linked_clones: 'true'
@@ -64,18 +65,19 @@ settings:
         pae: 'on'
         largepages: 'on'
         guestmemoryballoon: '128'
-        boxes:
-          debian8: minimal/jessie64
-          debian7: minimal/wheezy64
-          ubuntu1604: minimal/xenial64
-          ubuntu1404: minimal/trusty64
-          centos7: minimal/centos7
-          centos6: minimal/centos6
+      boxes:
+        debian8: minimal/jessie64
+        debian7: minimal/wheezy64
+        ubuntu1604: minimal/xenial64
+        ubuntu1404: minimal/trusty64
+        centos7: minimal/centos7
+        centos6: minimal/centos6
     docker:
-      force_host_vm: 'false'
-      pull: 'false'
-      remains_running: 'true'
-      stop_timeout: '30'
+      settings:
+        force_host_vm: 'false'
+        pull: 'false'
+        remains_running: 'true'
+        stop_timeout: '30'
       boxes:
         scratch: scratch
         alpine: alpine:latest
@@ -87,7 +89,7 @@ settings:
         centos7: centos:7
         centos6: centos:6
         centos5: centos:5
-        arch: archlinuxjp/archlinux
+        archlinux: archlinuxjp/archlinux
 provisionners:
   test_shell_script:
     type: shell
