@@ -24,6 +24,7 @@ show_banner = true
 show_config_merged = false
 show_config_instances = true
 show_config_parsed = false
+dry_run = false
 
 
 
@@ -202,7 +203,7 @@ conf_default = {
 
 # This function checks if a subelement of a
 # hash exists and it is not set to the 'null'
-# string. Returns a boolean.
+# string. Return a boolean.
 
 def attribute_is_defined(object, key)
 
@@ -222,136 +223,206 @@ end
 
 
 # This function is used to merge recursively two hashes. The
-# right array always win except when a '*_unset' key is found 
-# into the new value. If a '*_replace' key is found, the old
-# hash will be discarded.  Last point, it will remove all keys with
-# the 'unset' string value. Returns the merged array.
+# right array always win except when a '*_' key is found 
+# which can override the default behavior. See the documentation
+# for usage and complete examples. Return the merged array.
 
-def merge_recursively(h, o)
-  # h for hash, and o for overriding hash
+def get_merge_params(hash, key)
 
   merge_string = '_'
 
-  # Check if both objects are hashes
-  if h.class == Hash and o.class == Hash
-    h.merge(o) {|key, val_old, val_new|
+  if hash.has_key? key + merge_string
 
-      # Check if there is an action key and options
-      if o.has_key? (key + merge_string)
-        if o[key + merge_string].class == String
-          action = o[key + merge_string]
-        elsif o[key + merge_string].class == Hash
-
-          # Check requested action
-          if o[key + merge_string].has_key? ("action") and o[key + merge_string]["action"].class == String
-            action = o[key + merge_string]["action"]
-          else
-            action = 'merge'
-            print "WARN: The action key require to be a string (key: ", key , merge_string , ".action)\n"
-          end
-
-          # Check action options
-          if o[key + merge_string].has_key? ("options")
-            options = o[key + merge_string]["options"]
-          else
-            options = nil
-          end
-
-        end
-      else
-        action = "merge"
-        options = nil
-      end
-
-      # This is for debugging ...
-      #print "====> Work on key: ", key, " (", action ,") \n== OLD (", val_old.class ,") : ", YAML::dump(val_old), "\n== NEW (" , val_new.class ,") : " , YAML::dump(val_new) , "\n\n"
-      #print "====> Work on key: ", key, " (", action ,") \n== OLD (", val_old.class ,") : ", val_old, "\n== NEW (" , val_new.class ,") : " , val_new , "\n\n"
-
-      # Let's do it
-      case action
-
-      when 'replace'
-        # Replace all elements
-        val_new
-
-      when 'unset'
-        # Remove all elements
-        nil
-
-      when 'merge'
-        # Merge all elements
-
-        if val_new.class == Hash and val_old.class == Hash
-          merge_recursively(val_old, val_new)
-        else
-          # Keep old value if newer is not set
-          if val_new == nil
-            val_old
-          else
-            val_new
-          end
-        end
-
-      when 'intersect'
-        # Keep common elements
-
-        if val_new.class == Hash and val_old.class == Hash
-          val_new.keep_if { |k, v| val_old.key? k }
-        else
-          # Keep old value if newer not set
-          if val_new == nil
-            val_old
-          else
-            val_new
-          end
-        end
-
-      when 'complement'
-        # Keep all elements, except those listed
-
-        if val_new.class == Hash and val_old.class == Hash
-          t = merge_recursively(val_old, val_new)
-          # Retrieve options
-          if options.class ==Hash
-            t.delete_if { |k, v| options.key? k }
-          elsif options.class == Array
-            t.delete_if { |k, v| options.include? k }
-          else
-            t
-            print "WARN: Complement action require a Hash or an Array as options (key: ", key , merge_string , ".options)\n"
-          end
-        else
-          val_old
-        end
-
-      when 'difference'
-        # Remove common elements, keep uniques
-
-        if val_new.class == Hash and val_old.class == Hash
-          # Check options type
-          if options.class ==Hash
-            tn = val_new.select { |k, v| not options.key? k }
-            to = val_old.select { |k, v| not options.key? k }
-          elsif options.class == Array
-            tn = val_new.select { |k, v| not options.include? k }
-            to = val_old.select { |k, v| not options.include? k }
-          else
-            tn = val_new
-            to = val_old
-            print "WARN: Difference action require a Hash or an Array as options (key: ", key , merge_string , ".options)\n"
-          end
-          merge_recursively(tn, to)
-        else
-          val_new
-        end
-
-      else
-        print "ERROR: Action '", action ,"'not implemented (key: ", o + "." + key + merge_string , "options)\n"
-      end
-    }.delete_if {|k, v| k.end_with?('_')}
+    if hash[key + merge_string].class == String
+      out = {}
+      out['action'] = hash[key + merge_string]
+      out['options'] = nil
+      out
+    elsif hash[key + merge_string].class == Hash
+      out = hash[key + merge_string]
+      out
+    else
+      print 'ERROR: Action must be a String of a Hash and not ', hash[key + merge_string].class, "\n"
+    end
 
   else
-    o
+    out = {}
+    out['action'] = 'union'
+    out['options'] = {}
+    out
+  end
+
+end
+
+
+def merge_recursively(o_src, o_over, p=nil)
+  # o_src for source object
+  # o_over for overriding object
+  # p for params (string or hash)
+
+  result = 'UNSET'
+
+  # Retrieve parameters via yaml object or\
+  # Retrieve parameters via parameters
+  if p.class == String
+    action = p
+    options = nil
+  elsif p.class == Hash
+    action = p.fetch('action','union').to_s
+    options = p.fetch('options', nil)
+  else
+    action = 'union'
+    options = nil
+  end
+
+  # Debug
+  #print "===> (", action, ") Working with two objects: src: ",o_src.class, ", dst: ", o_over.class, "\n"
+  #print "====> Work on key: ", key, " (", action ,") \n== OLD (", val_old.class ,") : ", YAML::dump(val_old), "\n== NEW (" , val_new.class ,") : " , YAML::dump(val_new) , "\n\n"
+  #print "====> Work on key: ", key, " (", action ,") \n== OLD (", val_old.class ,") : ", val_old, "\n== NEW (" , val_new.class ,") : " , val_new , "\n\n"
+
+  # Do the action
+  case action
+
+  when 'replace'
+    # GOOD NAME: replace
+    # Return inconditionnaly the overriding object, even if undefined/empty.
+    result = o_over
+
+  when 'unset'
+    # GOOD NAME: unset
+    # Unset the value
+    result = nil
+
+  when 'union'
+    # GOOD NAME: merge
+    # Merge all objects, existing object are overrided
+
+    # Is overrinding object equal nil or empty?
+    if o_over.nil? or o_over.to_s.empty?
+      result = o_src
+
+    # Are both object Hash ?
+    elsif o_src.class == Hash and o_over.class == Hash
+      result = o_src.merge(o_over)
+
+      # Work on sub-objects
+      result = result.each {|k, v|
+        result[k] = merge_recursively(o_src[k], o_over[k], get_merge_params(o_over, k) )
+      }
+
+    # Then the new object type takes precedence
+    else
+      result =  o_over
+    end
+
+  when 'intersect'
+    # GOOD NAME: common
+    # Merge only common objects, existing object are overrided
+
+    # Is overrinding object equal nil ?
+    if o_over == nil or o_over.to_s.empty?
+      result = o_src
+
+    # Are both object Hash ?
+    elsif o_src.class == Hash and o_over.class == Hash
+
+      result = merge_recursively(o_src, o_over, 'union')
+
+      result = result.delete_if {|k, v|
+        not ( o_src.has_key?(k) and  o_over.has_key?(k) )
+      }
+
+    else
+      result = nil
+    end
+
+  when 'difference'
+    # GOOD NAME: exclude
+    # Remove all listed objects, existing object are overrided
+
+    # Is overrinding object equal nil ?
+    if o_over == nil or o_over.to_s.empty?
+      result = o_src
+
+    # Are both object Hash ?
+    elsif o_src.class == Hash and o_over.class == Hash
+
+      # Remove source objects if defined in options
+      o_src.each {|k, v|
+        if options.class == Hash or options.class == Array
+          if options.class == Hash and options.has_key?(k)
+            o_src.delete(k)
+          elsif options.class == Array and options.include?(k)
+            o_src.delete(k)
+          end
+        else
+          print "WARN: Options for difference must be a Hash or Array for key: ", k, "\n"
+        end
+      }
+
+      # Merge and override all objects
+      result = merge_recursively(o_src, o_over, 'union')
+
+    else
+      result = nil
+    end
+
+  when 'complement'
+    # GOOD NAME: invert
+    # Remove all listed objects, existing object are overrided, new objects are discarded if not previously defined
+
+    # Is overrinding object equal nil ?
+    if o_over == nil or o_over.to_s.empty?
+      result = o_src
+
+    # Are both object Hash ?
+    elsif o_src.class == Hash and o_over.class == Hash
+
+      result = {}
+      o_src.each {|k, v|
+
+        if ( options.class == Hash and not options.has_key?(k) ) or (options.class == Array and not options.include?(k))
+
+          # Check if the key is defined and not nil/empty in o_over
+          if o_over.has_key?(k) and (o_over[k] != nil and not o_over[k].to_s.empty? )
+            result[k] = merge_recursively(v, o_over[k], 'union')
+          else
+            result[k] = v
+          end
+
+        elsif options.class != Hash and options.class != Array
+          print "WARN: Options for difference must be a Hash or Array for key: ", k, "\n"
+        end
+      }
+      return result
+
+    else
+
+      # Return object only if previously defined
+      if o_src.class == Hash and o_over.class == Hash
+        result = o_over
+      else
+        result = nil
+      end
+
+    end
+
+  else
+    print "WARN: Action is not recognized: ", action, "\n"
+    result nil
+  end
+
+  # Debug
+  #print "Returns: ", YAML::dump(result)
+
+  # Return the result
+  if result == "UNSET"
+    puts "ERROR: You found a bug, please contact the maintener"
+    return nil
+  elsif result.class == Hash
+    return result.delete_if {|k, v| k.end_with?('_')}
+  else
+    return result
   end
 
 end
@@ -450,7 +521,7 @@ conf_merged['instances'].each do |key, value|
 
   # Define memory
   if attribute_is_defined(value, 'memory')
-    vm_config['memory'] = vm_config['cpu'] = value['memory']
+    vm_config['memory'] = vm_config['memory']
   else
     vm_config['memory'] = conf_merged['settings']['flavors'][vm_flavor]['memory']
   end
@@ -513,20 +584,10 @@ conf_merged['instances'].each do |key, value|
   
   vm_provisionners = {}
 
-
   # Detect which provisionners should be applied on instance
-  if value.has_key?('provisionners_unset')
-    vm_provisionners = {}
-  elsif value.has_key?('provisionners_replace')
-    vm_provisionners = value['provisionners']
-  elsif value['provisionners'].class == Hash
-    vm_provisionners = merge_recursively(
-      conf_merged['settings']['defaults']['provisionners'],
-      value['provisionners'])
-  else
-    vm_provisionners = {}
-  end
-
+  if conf_merged['settings']['defaults']['provisionners'] != {}
+    vm_provisionners = merge_recursively(conf_merged['settings']['defaults']['provisionners'],conf_merged['provisionners'], 'intersect')
+  end 
 
   # Merge instance provisionners with global provisionners
   vm_provisionners.each do |name, settings|
@@ -543,7 +604,7 @@ conf_merged['instances'].each do |key, value|
 
     # Check if provisionners are correctly set
     if settings.class != Hash
-      puts "ERROR: The provisionner '" + name + "' is not correclty set."
+      puts "ERROR: The provisionner '" + name + "' is not correctly set."
       abort
     end
 
@@ -605,7 +666,10 @@ if show_config_parsed
   print YAML::dump(conf_final)
 end
 
-
+# Check dry run
+if dry_run
+  exit 0
+end
 
 ########################################
 # Magic business
