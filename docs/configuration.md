@@ -7,7 +7,7 @@
 ## Installation
 
 
-To run easy-vagrant, you must have:
+To run Easy-vagrant, you must have:
 
 - vagrant
   - vagrant > 1.8
@@ -21,252 +21,140 @@ To run easy-vagrant, you must have:
   - ansible: ansible (any versions)
 
 
-
-
-
-
-
 ## YAML configuration overview
 
-The Easy-vagrant configuration seems pretty simple, bu it allow very sophisticated setups. We will see in this chapter the three main concepts of a good configuration.
+The Easy-vagrant configuration format is pretty simple, but it allows very sophisticated setups through default settings and merge strategies. We will see in this chapter the two main concepts of a Easy-vagrant configuration.
 
 ### Primary key settings
-In way to make a friendly configuration in yaml, a structure has been defined with three primary keys:
+In way to make a friendly configuration in yaml, a structure has been defined with three primary keys, defined at the root of the yaml file:
 
 1. ```settings```: There are all default settings. They default unset values.
 2. ```instances```: This is the definition of all your instances
 3. ```provisionners```: This is the definition of all your provisionners
 
-Easy-vagrant will read all these primary key to generate an array of instances, which will be understood by vagrant itself.
+
+> Note:
+> The complete structure specifications is available in the _Settings_ section of the [object definitions](object_definitions.md#Settings) documentation.
+
+
+Easy-vagrant will read all these primary key to generate an array of instances, which will be understood by Vagrant itself. The structure of these primary keys can be complicated to handle, as yaml does not provide structure for its data, so the full structure if described into the  [object definitions](object_definitions.md#Settings) documentation. You can also check out examples into the  [examples directory](examples). we will show you two configurations below.
+
+There is an example of a minimalistic setup, and it is sufficient to have 4 VMs:
+```
+---
+instances:
+  web:
+  redis:
+    number: 3
+    box: ubuntu1604
+```
+
+Another complete example below, but please remind you everything is optional, except the ``instances`` definitions.
+
+```
+---
+settings:
+  defaults:
+    flavor: preprod
+    box: project_box
+    provider: libvirt
+    provisionners:
+      install_python_for_ansible:
+        priority: 100
+      test_shell_cli:
+        priority: 70
+        params:
+          inline: echo "Instance ready" > /root/status
+      test_ansible:
+        priority: 90 
+        params:
+          playbook: my_own_playbook.yml
+  flavors:
+    mysql-prod:
+      cpu: 8
+      memory: 8192
+      disk: 100
+    mysql-preprod:
+      cpu: 2
+      memory: 2048
+      disk: 100
+    web-prod:
+      cpu: 4
+      memory: 4092
+      disk: 10
+    web-preprod:
+      cpu: 2
+      memory: 1024
+      disk: 10
+  boxes:
+    project_box: http://vagrant.company.com/box/master_project.box
+
+instances:
+  web:
+    number: 3
+    flavor: web-preprod
+  mysql:
+    number: 2
+    flavor: mysql-preprod
+```
+The default section is a list of settings applied by default to all instances. Each setting reference an existing object which is defined in other part of the configuration.
+
 
 ### Object definition
-Easy-vagrant use object to avoid code repetition, and it allow reference to those object in some specific contexts, described below.
+Easy-vagrant use objects to avoid code repetition, and it allows references to those object in some specific contexts.
 
 - boxes: Define a box
 - provisionners: Define a provisionner
-- providers: Define a provider
 - flavors: Define a flavor
 - instance: Define one (or N copies) of a VM
+- providers: Define a provider
 
-### Configuration inheritance
-TODO:
-
-## Object definition
-
-#### Object: box 
-A box might be the simplest object, is is defined by a key, and a value:
-```
-  <box_key_N>: <box_name|box_url>
-```
-
-#### Object: provisionner
-A provisionner object follow the following structure:
-
-```
-  <provisionners_key_N>:
-    type: <string>
-    description: <string>
-    priority: <int>
-    params: <hash>
-    
-```
-
-
-Where:
-
-- priority: integer 0 to 100, default to 0. Used when provisionners are merged, in way to know which one should be applied first. Optional.
-- type: Must be one of Vagrant supported provsionner, such as 'shell' or 'ansible' or your_provisionner. Required
-- description: Not parsed, just for you to remember what a provider do.
-- params: A hash of provider parameters. Required.
-
-
-
-#### Object: provider
-TODO.
-
-
-#### Object: flavor
-A flavor define a set of settings for an instance:
-```
-<flavor_key_N>:
-  cpu:
-  memory:
-  disk:
-```
-
-
-#### Object: instance
-This is how is defined an instances:
-
-```
-  <instance_key_N>:
-    number: <int>
-    flavor: &flavor_key_N
-    cpu: <int>
-    memory: <int>
-    disk: <int>
-    ports:   (virtualbox only)
-      - guest: <port on guest>
-        host: <port on host>
-        protocol: tcp|udp
-    provisionners:
-      &provisionners_key:
-      <provisionners_key_N>:
-      ...
-```
-Every parameters are optional, only key defines the instance creation. The settings are the following:
-
-- number: Number of instance to create, default 1. If set to 0, the instance will not be created
-- flavor: Override default flavor. Take an existing flavor reference.
-- cpu: Override flavor CPU settings
-- memory: Override flavor RAM setting
-- disk: Override flavor Disk setting
-- Ports: Map guest port on localhost host interface. This settings only works with VirtualBox. It takes as argument a list of hash, where:
-  - guest: Is a port number on guest.
-  - host: Is a port number on host. TODO: At the current time, it may pose an issue when the ```number``` setting is used.
-  - protocol: Can bon ```tcp``` or ```udp```. Default:  ```tcp```
-- provisionners: It contains a hash of provisionners, where the key represent a reference to an existing provisionners (if it does not exists, it will create it if enough settings are provided). 
-
-
-
-## Configuration structure
-
-
-#### ```Settings``` key
-Structure:
-```
-defaults:
-  flavor: &flavor_key_N
-  box: &box_key_N
-  provider: &provider_name_N
-  provisionners:
-    &provisionners_key:
-    <provisionners_key_N>:
-    ...
-flavors:
-  <flavor_key_N>:
-  ...
-boxes:
-  <box_key_N>:
-  ...
-providers:
-  <provider_name_N>:
-  ...
-```
-The default section is a list of settings applied by default to all instances. Each setting reference an existing object in other part of the config, excepted for the provisionners key, where you can put a hash of provisisionner keys.
-
-#### ```Instances``` key
-This define an instance. You can use the following parameters:
-
-```
-instances:
-  <instance_key_N>:
-  ...
-```
-
-
-#### ```Provisionners``` key
-A provsionner allow you to provision your instances. The structure is the following:
-
-```
-provisionners:
-  <provisionners_key_N>:
-  ...
-```
+> Note:
+> The complete objects specifications is available in the _Object_ section of the [object definitions](object_definitions.md#Objects) documentation.
 
 
 ## Default configuration 
-Easy-vagrant comes with some nifty defaults. The full structure is available in the source code, where the ```conf_default``` variable is defined. You can also checkout a copy of this structure in yaml [here](default_config.md).
+Easy-vagrant comes with some nifty defaults. They try to fit the most common cases, but if they don't fit to your needs, you can override/adjust any of them through inheritance mechanisms. We introduce here all defaults objects, and their specificities in dedicated sub sections.
 
-Easy-vagrant provides these defaults:
+> Note:
+> The complete default objects specifications is available in the _Default_ section of the [object definitions](object_definitions.md#Default) documentation. You can checkout the very last specifications in the ``VagrantFile`` file source code, where the ```conf_default``` variable is defined. There is also a dump of the current default configuration in the [Default configuration](default_configuration.md) file. You can regenerate this dump by setting ``show_config_parsed`` to true``, see [hacking](#Hacking) chapter.
 
-- Default flavors
-- Default VM box (generic)
-- Default provisionners
-- Default VM box (per providers)
+Easy-vagrant provides these default objects:
 
-#### Default flavors
-There are some already set flavors, you can use them or even create your own, ore even override them:
+- Default flavors:
+  - ``micro``
+  - ``tiny``
+  - ``small``
+  - ``medium``
+  - ``large``
+  - ``huge``
+- Default VM box (generic, might be override at provider level)
+  - ``debian8``
+  - ``debian8``
+  - ``centos8`` 
+  - ``centos8``
+  - ``ubuntu1604``
+  - ``ubuntu1404``
+  - ``archlinux``
+- Default provisionners:
+  - ``test_shell_script``: Run a shell script on guest
+  - ``test_shell_cli``: Run a command on guests
+  - ``install_python_for_ansible``: Install python on guests
+  - ``test_ansible``: Run a default playbook
+- Default VM box (per providers, see the doc)
 
-    micro:
-      cpu: '1'
-      memory: '128'
-      disk: '10'
-    tiny:
-      cpu: '2'
-      memory: '512'
-      disk: '10'
-    small:
-      cpu: '2'
-      memory: '1024'
-      disk: '10'
-    medium:
-      cpu: '2'
-      memory: '2024'
-      disk: '10'
-    large:
-      cpu: '3'
-      memory: '4096'
-      disk: '10'
-    huge:
-      cpu: '4'
-      memory: '8192'
-      disk: '10'
-      
+#### Provisionners
+Provisionners  are not enabled by default when defined in the ``provisionners`` key. To enable them, you need to list them into the ``settings.defaults.provisionners`` key or per instance in ``instances.<instance_id>.provisionners`` key. A simple mention of the key is enough to enable them. You can obviously override them with a specific merging startegy.
 
-#### Default boxes (generic)
-Default box are the following:
+#### Default Boxes    
+It is important to note every provider should provide these default keys to be compatible across different setups. See the next chapter to understand in depth how per provider box works.
 
-    debian8: wholebits/debian8-64
-    debian7: wholebits/debian7-64
-    ubuntu1604: wholebits/ubuntu16.10-64
-    ubuntu1404: wholebits/ubuntu14.04-64
-    centos7: wholebits/centos7
-    centos6: wholebits/centos5-64
-    arch: wholebits/arch-64
-    
-    
-It is important to note every provider should provide these default keys to be compatible across different setups.
-
-#### Default provisionners
-We present here the default providers. They are not enabled by default, you need to explicitly in the ```provisionners``` key, either in the ```default``` section, or per instance. As you can see, they are not very useful, but you may use them if you want to override them.
-
-    test_shell_script:
-      type: shell
-      description: This execute a shell script
-      params:
-        path: conf/scripts/test_script.sh
-        args:
-        - Provisionning
-        - shell_script
-        - worked as expected as non root.
-        privileged: false
-    install_python_for_ansible:
-      type: shell
-      priority: '90'
-      description: This will install Python on the target
-      params:
-        path: conf/scripts/install_python.sh
-        privileged: true
-    test_shell_cli:
-      type: shell
-      description: This execute a shell command
-      params:
-        inline: echo $1 $2 $3 > /tmp/vagrant_provisionning_cli
-        args:
-        - Provisionning
-        - shell_cli
-        - worked as expected as root.
-        privileged: true
-    test_ansible:
-      type: ansible
-      description: This run an Ansible playbook
-      params:
-        playbook: conf/ansible/playbook.yml
+> Note:
+> If you want to use your own boxes, and if you want to be portables across different providers, be sure you provided a compatible box for each provider.
 
 
 #### Default boxes (per provider)
-Some box are not available for all provider. The default boxes should support at least Libvirt and VirtualBox, but sometimes we want to use specific boxes for specific providers. In this case, the default for VirtualBox is completely unecessary as default boxes already support it. We just wanted here to use minimal boxes instead the default one.
+Some boxes are multi provider, some other not. By default, default boxes support LibVirt and VirtualBox. But sometimes we want to use a specific boxes for a specific providers, so you can override those defaults. It is especially used for the Docker support, where VM images and containers are not the same technologies. 
 
 ##### Default box for VirtualBox:
 
@@ -289,69 +177,97 @@ Some box are not available for all provider. The default boxes should support at
     centos7: centos:7
     centos6: centos:6
     centos5: centos:5
-    arch: archlinuxjp/archlinux
+    archlinux: archlinuxjp/archlinux
 
 
 
-## Configuration overriding an inheritance
-The vagrant definition should be exclusively done with yaml syntax. You should not have to modify the ```Vagrantfile``` in any way unless you want to debug or add new features. The configuration is split in 3 main sources:
+## Inheritance and merging strategies
+
+Easy-vagrant configuration can be split in three different areas, and this chapter will present how those configurations are merged (inheritance) and how you can modify its behaviour (merging strategy).
+
+### Inheritance
+
+The vagrant definition should be exclusively done with yaml syntax. You should not have to modify the ```Vagrantfile``` in any way unless you want to debug or add new features. The configuration is split in 3 main sources, in order of inheritance:
 
 1. Default config: This is the hardcoded configuration. It comes with some handy defaults, such as provisionners and preset boxes for vagrant providers. You should never have to modify this configuration. Source: ```Vagrantfile```
 2. Developper config: This is the configuration made by the developper of this Vagrant setup. It should mainly define the instance settings, and some provisionners. Source file: ```conf/vagrant.yml```
-0. User config: This config is optional and allow the final user to ovverrides some settings according to its local computer. This configuration is outside of the git repository. Source: ```local.yml```
-
-The default configuration inherits configuration to developper configuraiton, and user configuration inherits all configurations.
-
-### Default inheritance behavior
+3. User config: This config is optional and allow the final user to ovverrides some settings according to its local computer. This configuration is outside of the git repository. Source: ```local.yml```
 
 
-### Customized inheritance behavior
+### Default merging strategy
+By default, when two objects are present in parent and child configuration, the child configuration take precedence, unless the child key is set empty. Hashes are merged this way recursively. This is the default behaviour when no merging strategy are not set.
+
+### Customized merging strategy
+To define a merging strategy on a key, you need to create a new key at the same level with the same name appended with ``_``. No worries these keys will be deleted once parsed.
+
+> Note:
+> All the available strategy are a pretty complicated algorithm to write, and as this stage of the project, there are no unit tests. See the [hacking](#Hacking) section if you want to discover how to debug them in case of troubles.
+
+Merge strategy:
+
+- ``union`` (merge):  This is a simple recursive merge, child value takes precedence when non empty.
+- ``replace`` (replace): Replace unconditionally the parent value.
+- ``unset`` (unset): Unset the key.
+- ``intersect`` (common): Keep only common objects defined in both parent in child. Other are discarded.
+- ``difference`` (exclude [list]): Remove a list of objects if present in parent, the resulting list is merged (``union``) with child objects.
+- ``complement`` (invert [list]): Invert a list of objects if present in parent, the resulting list is merged (``union``) with child objects only if they were present in parent.
 
 
 
-#### Provisionners
-
-
-## Internal
-
-
-
-### Internal vs exposed configuration
+> Note:
+> The complete merge strategy specifications is available in the _Merge Strategy_ section of the [object definitions](object_definitions.md#Merge-Strategy) documentation.
 
 
 
-### Loading order and inheritance
-
-There are two special values:
-
-- ```nil```: Mainly used to not override a inherited value. Sort of comments finally.
-- ```unset```: This remove the key. You may use this when you do not want to inherits some settings from default or developper configuration. You may not need to use this, but always useful to have it in case of. Be aware: easy-vagrant expect to have keys always defined, even if they have an empty value. Dont try to unset top level keys unless you want to break easy-vagrant.
-
-
-```sequence
-None-->Default: provides
-Default-->Developper: provides
-Developper-->User: provides
-
-Developper-->Default: nil
-User-->Developper: nil
-Developper->None: unset
-User->None: unset
+As you can see, some merge strategies takes a list as parameter, so in way to make things quick to write, there are two format:
 
 ```
+# First format, only available when strategy don't need options
+provisionners_: replace
+provisionners:
+  key1: val1
+  key2: val2
+  ...
+  
 
-### Expand and override defaults settings
-It is quite easy, just replace the directive with your own content. If it is a hash, it will be merged with the inherited value. Example to expand available boxes:
+# Second format, only required when strategy needs options, with Array
+provisionners_: 
+  action: intersect
+  options:
+    - key2
+provisionners:
+  key1: val1
+  key2: val2
+  ...
+  
+ 
+# Second format, only required when strategy needs options, with Hash
+provisionners_: 
+  action: intersect
+  options:
+    key2:
+provisionners:
+  key1: val1
+  key2: val2
+  ...
+  
 ```
-settings:
-  boxes:
-    mycustomboxname: mycustombox_url/mycustombox_atlas_id
-```
-To overrides, there is a trick, we need to declare two times the children, the firest one with the unset value, and another time with the new content:
-```
-settings:
-  boxes: unset
-  boxes:
-    mycustomboxname: mycustombox_url/mycustombox_atlas_id
-```
+It is important to note that options expect a list of key or can be directly a hash. Internally, array are converted to hash. When used with hash, there is no point to set a value to the key, as they are never parsed.
+
+
+## Examples
+Many examples configuration are provided into the [examples directory](examples). You just need to look these files, and copy them in place of the ``conf/vagrant.yml``. You can use them as user configuration (```local.yml```) as well, but it might not be very relevant to do that.
+
+## Hacking
+
+Ruby is rough, and can be difficult to debug. You may need as well to dump your configuration at some stage of the Easy-vagrant parsing. For this, there are some variables which could be switched to get an extensive dump of the current configuration. They are placed directly into the ``VagrantFile``, so you need to go into the source code to modify them, close to the top of the file:
+
+Variables:
+
+- ``dry_run``: Just parse the configuration, never launch Vagrant
+- ``show_banner``: Show Easy-vagrant banner.
+- ``show_config_merged``: This show the merging of all configurations (default, developper and user)
+- ``show_config_parsed``: Show the generated configuration, once completely parsed, instances definitions included.
+- ``show_config_instances``: Show only the instances configuration.
+
 
