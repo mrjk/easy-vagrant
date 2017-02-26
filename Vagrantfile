@@ -21,10 +21,10 @@ require 'yaml'
 
 # Internal variables
 show_banner = true
-show_config_merged = false
+dry_run = true
+show_config_merged = true
+show_config_parsed = true
 show_config_instances = true
-show_config_parsed = false
-dry_run = false
 
 
 
@@ -34,7 +34,7 @@ dry_run = false
 
 if show_banner
   puts "INFO: ===================================================="
-  puts "INFO: ==             Welcome on easy-vagrant            =="
+  puts "INFO: ==             Welcome on Easy-vagrant            =="
   puts "INFO: ==                    by mrjk                     =="
   puts "INFO: ===================================================="
 end
@@ -97,7 +97,7 @@ conf_default = {
       'ubuntu1404' => 'wholebits/ubuntu14.04-64',
       'centos7' => 'wholebits/centos7',
       'centos6' => 'wholebits/centos5-64',
-      'arch' => 'wholebits/arch-64',
+      'archlinux' => 'wholebits/arch-64',
     },
     'providers' => {
       'libvirt' => {
@@ -149,7 +149,7 @@ conf_default = {
           'centos7' => 'centos:7',
           'centos6' => 'centos:6',
           'centos5' => 'centos:5',
-          'arch' => 'archlinuxjp/archlinux'
+          'archlinux' => 'archlinuxjp/archlinux'
         }
       }
     }
@@ -677,6 +677,7 @@ end
 
 # Check dry run
 if dry_run
+  puts "NOTICE: Dry run mode enabled, not going to Vagrant."
   exit 0
 end
 
