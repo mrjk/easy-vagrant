@@ -503,7 +503,7 @@ conf_merged['instances'].each do |key, value|
   # Manage flavors
   # =====================
  
-  # Get flavor name
+  # Get flavor name (default value)
   if attribute_is_defined(value, 'flavor')
     # Instance flavor is set
     vm_flavor = value['flavor']
@@ -521,7 +521,7 @@ conf_merged['instances'].each do |key, value|
 
   # Define memory
   if attribute_is_defined(value, 'memory')
-    vm_config['memory'] = vm_config['memory']
+    vm_config['memory'] = value['memory']
   else
     vm_config['memory'] = conf_merged['settings']['flavors'][vm_flavor]['memory']
   end
