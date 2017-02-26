@@ -59,12 +59,12 @@ conf_default = {
       'provisionners' => {},
     },
     'flavors' => {
-      'micro' => {
+      'nano' => {
         'cpu' => '1',
         'memory' => '128',
-        'disk' => '10'
+        'disk' => '5'
       },
-      'tiny' => {
+      'micro' => {
         'cpu' => '2',
         'memory' => '512',
         'disk' => '10'
@@ -77,17 +77,17 @@ conf_default = {
       'medium' => {
         'cpu' => '2',
         'memory' => '2048',
-        'disk' => '10'
+        'disk' => '20'
       },
       'large' => {
         'cpu' => '3',
         'memory' => '4096',
-        'disk' => '10'
+        'disk' => '30'
       },
-      'huge' => {
+      'xlarge' => {
         'cpu' => '4',
         'memory' => '8192',
-        'disk' => '20'
+        'disk' => '40'
       }
     },
     'boxes' => {

@@ -116,12 +116,12 @@
 ### default_flavors
 | Id | cpu | memory | disk |
 |----|-----|--------|------|
-| micro | 1 | 128 | 10 | 
-| tiny | 2 | 512 | 10 | 
+| nano | 1 | 128 | 5 | 
+| micro | 2 | 512 | 10 | 
 | small | 2 | 1024 | 10 | 
-| medium | 2 | 2048 | 10 | 
-| large | 3 | 4096 | 15 | 
-| huge | 4 | 8192 | 20 | 
+| medium | 2 | 2048 | 20 | 
+| large | 3 | 4096 | 30 | 
+| xlarge | 4 | 8192 | 40 | 
 
 ### default_boxes
 | Id | Source | Provider |
