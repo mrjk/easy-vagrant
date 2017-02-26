@@ -1,0 +1,11 @@
+# vim: tabstop=2 softtabstop=0 expandtab shiftwidth=2 smarttab :
+---
+
+instances:
+  centos7:
+    box: centos7
+  debian8:
+    box: debian8
+  ubuntu1604:
+    box: ubuntu1604
+
