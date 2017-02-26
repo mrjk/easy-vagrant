@@ -3,6 +3,14 @@
 ## Table of content
 [TOC]
 
+## Legend
+
+Some definitions may seems a bit cryptic in thses tables, so there is the definition below:
+
+- ``$id``: Define a key you can attribute a name.
+- ``{flavor_data}``: Reference to a key, a ``flavor_data`` key in this example.
+- ``{instance_id}*``: Reference one or more key, a ``instance_id`` key in this example, the list usually takes form of Hash.
+
 
 ## Settings
 
@@ -43,7 +51,7 @@
 ### provisionners_id
 | Key | Type | Required | Default | Context | Choices | Description |
 |-----|------|----------|---------|---------|---------|-------------|
-| <id> | Hash | no |  | provisionners_def | {provisionner_data} | This creates a new provisionner. | 
+| $id | Hash | no |  | provisionners_def | {provisionner_data} | This creates a new provisionner. | 
 
 ### provisionner_data
 | Key | Type | Required | Default | Context | Choices | Description |
@@ -60,12 +68,12 @@
 ### box_id
 | Key | Type | Required | Default | Context | Choices | Description |
 |-----|------|----------|---------|---------|---------|-------------|
-| <id> | String | no |  | box_def | Atlas ID or URL | This creates a new box, with the reference or URL of the box. | 
+| $id | String | no |  | box_def | Atlas ID or URL | This creates a new box, with the reference or URL of the box. | 
 
 ### flavor_id
 | Key | Type | Required | Default | Context | Choices | Description |
 |-----|------|----------|---------|---------|---------|-------------|
-| <id> | Hash | no |  | flavor_def | {flavor_data} | This define a flavor. | 
+| $id | Hash | no |  | flavor_def | {flavor_data} | This define a flavor. | 
 
 ### flavor_data
 | Key | Type | Required | Default | Context | Choices | Description |
@@ -77,7 +85,7 @@
 ### instance_id
 | Key | Type | Required | Default | Context | Choices | Description |
 |-----|------|----------|---------|---------|---------|-------------|
-| <id> | Hash | no |  | instance_def | {instance_data} | Define one or more instance. | 
+| $id | Hash | no |  | instance_def | {instance_data} | Define one or more instance. | 
 
 ### instance_data
 | Key | Type | Required | Default | Context | Choices | Description |
@@ -96,12 +104,12 @@
 |-----|------|----------|---------|---------|---------|-------------|
 | guest | Integer | yes |  | port_data | 0 to 65535 | Guest port to map. 0 disable the port. | 
 | host | Integer | yes |  | port_data | 0 to 65535 | Host port to map on 127.0.0.1 interface. 0 disable the port. | 
-| protocol | String | no | tcp | port_data | tcp|udp | Define protocol TCP or UDP. | 
+| protocol | String | no | tcp | port_data | tcp\|udp | Define protocol TCP or UDP. | 
 
 ### provider_id
 | Key | Type | Required | Default | Context | Choices | Description |
 |-----|------|----------|---------|---------|---------|-------------|
-| <id> | Hash | no |  | provider_def | {provider_data} | Define a provisionner | 
+| $id | Hash | no |  | provider_def | {provider_data} | Define a provisionner | 
 
 ### provider_data
 | Key | Type | Required | Default | Context | Choices | Description |
@@ -116,13 +124,13 @@
 ### merge_strategy
 | Key | Type | Required | Default | Context | Choices | Description |
 |-----|------|----------|---------|---------|---------|-------------|
-| <key>_ | Hash or String | no | union | any | union|replace|unset|intersect|{merge_data} | Define a merge strategy on this key. The key must be appended with _. | 
+| $key_ | Hash or String | no | union | any | union\|replace\|unset\|intersect\|{merge_data} | Define a merge strategy on this key. The key must be appended with _. | 
 
 ### merge_data
 | Key | Type | Required | Default | Context | Choices | Description |
 |-----|------|----------|---------|---------|---------|-------------|
-| action | String | no | union | merge_strategy | union|replace|unset|intersect|difference|complement | Define the merge strategy | 
-| options | Array or Hash | Yes if complement|difference | {} | merge_strategy | {<key_id>}* | Define the concerned keys | 
+| action | String | no | union | merge_strategy | union\|replace\|unset\|intersect\|difference\|complement | Define the merge strategy | 
+| options | Array or Hash | Yes if complement\|difference | {} | merge_strategy | {$key_id}* | Define the concerned keys | 
 
 ## Default
 

@@ -1,4 +1,4 @@
-,,,,"Note: Please use backtick (`) instead of colon (,)",,,,
+,"Note: Please use backtick (`) instead of colon (,)",,,,,,,
 ,,Configuration Structure,,,,,,
 ,,,,,,,,
 provisionner_data,Settings,Key,Type,Required,Default,Context,Choices,Description
@@ -25,7 +25,7 @@ default_data,Settings,provisionners,Hash,no,{},settings_data,{provisionner_id}*,
 ,,Objects,,,,,,
 ,,,,,,,,
 provisionners_id,Objects,Key,Type,Required,Default,Context,Choices,Description
-provisionners_id,Objects,<id>,Hash,no,,provisionners_def,{provisionner_data},This creates a new provisionner.
+provisionners_id,Objects,$id,Hash,no,,provisionners_def,{provisionner_data},This creates a new provisionner.
 ,,,,,,,,
 provisionner_data,Objects,Key,Type,Required,Default,Context,Choices,Description
 provisionner_data,Objects,type,String,yes,,provisionner_data,Define which vagrant provisionner is used.,Define the provisionner name.
@@ -35,11 +35,11 @@ provisionner_data,Objects,params,Hash,yes,,provisionner_data,,Set the parameters
 ,,,,,,,,
 ,,,,,,,,
 box_id,Objects,Key,Type,Required,Default,Context,Choices,Description
-box_id,Objects,<id>,String,no,,box_def,Atlas ID or URL,This creates a new box` with the reference or URL of the box.
+box_id,Objects,$id,String,no,,box_def,Atlas ID or URL,This creates a new box` with the reference or URL of the box.
 ,,,,,,,,
 ,,,,,,,,
 flavor_id,Objects,Key,Type,Required,Default,Context,Choices,Description
-flavor_id,Objects,<id>,Hash,no,,flavor_def,{flavor_data},This define a flavor.
+flavor_id,Objects,$id,Hash,no,,flavor_def,{flavor_data},This define a flavor.
 ,,,,,,,,
 flavor_data,Objects,Key,Type,Required,Default,Context,Choices,Description
 flavor_data,Objects,cpu,Integer,yes,,flavor_data,1 to N,Define instance CPU (vCPUs).
@@ -48,7 +48,7 @@ flavor_data,Objects,disk,Integer,yes,,flavor_data,1 to N,Define instance disk sp
 ,,,,,,,,
 ,,,,,,,,
 instance_id,Objects,Key,Type,Required,Default,Context,Choices,Description
-instance_id,Objects,<id>,Hash,no,,instance_def,{instance_data},Define one or more instance.
+instance_id,Objects,$id,Hash,no,,instance_def,{instance_data},Define one or more instance.
 ,,,,,,,,
 instance_data,Objects,Key,Type,Required,Default,Context,Choices,Description
 instance_data,Objects,box,String,no,(inherited),instance_data,{box_id},
@@ -63,11 +63,11 @@ instance_data,Objects,provisionners,Hash,no,(inherited),instance_data,{provision
 port_data,Objects,Key,Type,Required,Default,Context,Choices,Description
 port_data,Objects,guest,Integer,yes,,port_data,0 to 65535,Guest port to map. 0 disable the port.
 port_data,Objects,host,Integer,yes,,port_data,0 to 65535,Host port to map on 127.0.0.1 interface. 0 disable the port.
-port_data,Objects,protocol,String,no,tcp,port_data,tcp|udp,Define protocol TCP or UDP.
+port_data,Objects,protocol,String,no,tcp,port_data,tcp\|udp,Define protocol TCP or UDP.
 ,,,,,,,,
 ,,,,,,,,
 provider_id,Objects,Key,Type,Required,Default,Context,Choices,Description
-provider_id,Objects,<id>,Hash,no,,provider_def,{provider_data},Define a provisionner
+provider_id,Objects,$id,Hash,no,,provider_def,{provider_data},Define a provisionner
 ,,,,,,,,
 provider_data,Objects,Key,Type,Required,Default,Context,Choices,Description
 provider_data,Objects,settings,Hash,no,,provider_data,,Global settings of the provider. Check the provider documentation.
@@ -77,12 +77,12 @@ provider_data,Objects,boxes,Hash,no,,provider_data,{box_id}*,Override default bo
 ,,Merge strategy,,,,,,
 ,,,,,,,,
 merge_strategy,Merge strategy,Key,Type,Required,Default,Context,Choices,Description
-merge_strategy,Merge strategy,<key>_,Hash or String,no,union,any,union|replace|unset|intersect|{merge_data},Define a merge strategy on this key. The key must be appended with _.
+merge_strategy,Merge strategy,$key_,Hash or String,no,union,any,union\|replace\|unset\|intersect\|{merge_data},Define a merge strategy on this key. The key must be appended with _.
 ,,,,,,,,
 ,,,,,,,,
 merge_data,Merge strategy,Key,Type,Required,Default,Context,Choices,Description
-merge_data,Merge strategy,action,String,no,union,merge_strategy,union|replace|unset|intersect|difference|complement,Define the merge strategy
-merge_data,Merge strategy,options,Array or Hash,Yes if complement|difference,{},merge_strategy,{<key_id>}*,Define the concerned keys
+merge_data,Merge strategy,action,String,no,union,merge_strategy,union\|replace\|unset\|intersect\|difference\|complement,Define the merge strategy
+merge_data,Merge strategy,options,Array or Hash,Yes if complement\|difference,{},merge_strategy,{$key_id}*,Define the concerned keys
 ,,,,,,,,
 ,,,,,,,,
 ,,Default objects,,,,,,
