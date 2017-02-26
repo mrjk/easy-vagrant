@@ -495,6 +495,11 @@ end
 # =====================
 conf_final['instances'] = {}
 
+if not conf_merged.has_key?('instances')
+  print "ERROR: No instances are defined.\n"
+  exit 1 
+end
+
 conf_merged['instances'].each do |key, value|
 
   vm_config = {}
