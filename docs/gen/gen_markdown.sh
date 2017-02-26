@@ -15,11 +15,19 @@ tables_id=$(echo "$table_csv" | awk -F ";" '{print $1}' | grep -v '^$' | uniq )
 
 
 # Define header
-echo "# Easy-vagrant object definitions"
-echo ""
-echo "## Table of content"
-echo "[TOC]"
-echo ""
+echo '# Easy-vagrant object definitions'
+echo ''
+echo '## Table of content'
+echo '[TOC]'
+echo ''
+echo '## Legend'
+echo ''
+echo 'Some definitions may seems a bit cryptic in thses tables, so there is the definition below:'
+echo ''
+echo '- ``$id``: Define a key you can attribute a name.'
+echo '- ``{flavor_data}``: Reference to a key, a ``flavor_data`` key in this example.'
+echo '- ``{instance_id}*``: Reference one or more key, a ``instance_id`` key in this example, the list usually takes form of Hash.'
+echo ''
 
 registered_cat=""
 
