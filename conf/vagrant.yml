@@ -1,64 +1,14 @@
 # vim: tabstop=2 softtabstop=0 expandtab shiftwidth=2 smarttab :
 ---
 
-settings:
-  defaults:
-    flavor: tiny
-    box: centos7
-    provisionners:
-      test_shell_script:
-      test_shell_cli: unset
-      test_ansible:
-  boxes:
-    mysql: wholebits/centos6-64 
-    nginx: wholebits/centos5-64 
-
-
-provisionners:
-  first_test:
-    type: shell
-    params:
-      inline: "echo $1 $2 > /tmp/test1"
-      args: 
-        - 'hello, world!'
-        - 'second argument'
-      env: {}
-      privileged: true
-  second_test:
-    type: shell
-    params:
-      inline: "echo $1 $2 > /tmp/test2"
-      args: 
-        - 'hello, world!'
-        - 'second argument'
-      privileged: true
-  ansible_test1:
-    type: ansible
-    params:
-      playbook: conf/playbook.yml
- 
 instances:
-  web:
-    box: debian8
-    flavor: tiny
-    ports:
-      - guest: 80
-        host: 8080
-        protocol: tcp
-      - guest: 22
-        host: 8022
-    provisionners:
-      shell_install_python:
-        priority: 90
-        type: shell
-        params:
-          name: Install python on Debian
-          inline: 'apt-get update ; apt-get install -y python'
-      second_test:
-  mysql:
-    number: 1
-  mon:
-    number: 2
-
-
+  centos7:
+    box: centos7
+    cpu: 1
+    memory: 512
+    disk: 30
+#  debian8:
+#    box: debian8
+#  ubuntu1604:
+#    box: ubuntu1604
 
