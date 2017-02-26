@@ -74,6 +74,17 @@ provider_data,Objects,settings,Hash,no,,provider_data,,Global settings of the pr
 provider_data,Objects,instances,Hash,no,,provider_data,,Settings to be applied on all instances. Check the provider documentation.
 provider_data,Objects,boxes,Hash,no,,provider_data,{box_id}*,Override default box id for this provider.
 ,,,,,,,,
+,,Merge strategy,,,,,,
+,,,,,,,,
+merge_strategy,Merge strategy,Key,Type,Required,Default,Context,Choices,Description
+merge_strategy,Merge strategy,<key>_,Hash or String,no,union,any,union|replace|unset|intersect|{merge_data},Define a merge strategy on this key. The key must be appended with _.
+,,,,,,,,
+,,,,,,,,
+merge_data,Merge strategy,Key,Type,Required,Default,Context,Choices,Description
+merge_data,Merge strategy,action,String,no,union,merge_strategy,union|replace|unset|intersect|difference|complement,Define the merge strategy
+merge_data,Merge strategy,options,Array or Hash,Yes if complement|difference,{},merge_strategy,{<key_id>}*,Define the concerned keys
+,,,,,,,,
+,,,,,,,,
 ,,Default objects,,,,,,
 ,,,,,,,,
 default_flavors,Default,Id,cpu,memory,disk,,,
@@ -92,7 +103,7 @@ default_boxes,Default,ubuntu1604,wholebits/ubuntu16.10-64,default,,,,
 default_boxes,Default,ubuntu1404,wholebits/ubuntu14.04-64,default,,,,
 default_boxes,Default,centos7,wholebits/centos7,default,,,,
 default_boxes,Default,centos6,wholebits/centos5-64,default,,,,
-default_boxes,Default,arch,wholebits/arch-64,default,,,,
+default_boxes,Default,archlinux,wholebits/arch-64,default,,,,
 default_boxes,Default,,,,,,,
 default_boxes,Default,debian8,minimal/jessie64,VirtualBox,,,,
 default_boxes,Default,debian7,minimal/wheezy64,VirtualBox,,,,
@@ -111,7 +122,7 @@ default_boxes,Default,ubuntu1204,ubuntu:precise,Docker,,,,
 default_boxes,Default,centos7,centos:7,Docker,,,,
 default_boxes,Default,centos6,centos:6,Docker,,,,
 default_boxes,Default,centos5,centos:5,Docker,,,,
-default_boxes,Default,arch,archlinuxjp/archlinux,Docker,,,,
+default_boxes,Default,archlinux,archlinuxjp/archlinux,Docker,,,,
 ,,,,,,,,
 ,,,,,,,,
 ,,,,,,,,

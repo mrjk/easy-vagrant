@@ -110,6 +110,20 @@
 | instances | Hash | no |  | provider_data |  | Settings to be applied on all instances. Check the provider documentation. | 
 | boxes | Hash | no |  | provider_data | {box_id}* | Override default box id for this provider. | 
 
+## Merge strategy
+
+
+### merge_strategy
+| Key | Type | Required | Default | Context | Choices | Description |
+|-----|------|----------|---------|---------|---------|-------------|
+| <key>_ | Hash or String | no | union | any | union|replace|unset|intersect|{merge_data} | Define a merge strategy on this key. The key must be appended with _. | 
+
+### merge_data
+| Key | Type | Required | Default | Context | Choices | Description |
+|-----|------|----------|---------|---------|---------|-------------|
+| action | String | no | union | merge_strategy | union|replace|unset|intersect|difference|complement | Define the merge strategy | 
+| options | Array or Hash | Yes if complement|difference | {} | merge_strategy | {<key_id>}* | Define the concerned keys | 
+
 ## Default
 
 
@@ -132,7 +146,7 @@
 | ubuntu1404 | wholebits/ubuntu14.04-64 | default | 
 | centos7 | wholebits/centos7 | default | 
 | centos6 | wholebits/centos5-64 | default | 
-| arch | wholebits/arch-64 | default | 
+| archlinux | wholebits/arch-64 | default | 
 | 
 | debian8 | minimal/jessie64 | VirtualBox | 
 | debian7 | minimal/wheezy64 | VirtualBox | 
@@ -151,7 +165,7 @@
 | centos7 | centos:7 | Docker | 
 | centos6 | centos:6 | Docker | 
 | centos5 | centos:5 | Docker | 
-| arch | archlinuxjp/archlinux | Docker | 
+| archlinux | archlinuxjp/archlinux | Docker | 
 
 ### default_provisionners
 | id | type | Description |
