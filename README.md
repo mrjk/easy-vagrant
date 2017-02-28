@@ -31,7 +31,7 @@ Better than Ruby syntax, nah? So, let's go into it :-)
 
 
 ## Quick start
-To follow this quick start guide, you must ensure you have at least VirtualBox and Vagrant installed on you computer:
+To follow this quick start guide, you must ensure you have at least Vagrant and VirtualBox (or LibVirt) installed on you computer:
 
 ```
 # Create your project directory from this repo
@@ -42,9 +42,10 @@ cd my_project
 
 # Run Vagrant
 vagrant up
+
+# Tadaahhh !
 ```
-Ok, that was pretty simple, you may want something more powerful, right? Fair enough, Easy-vagrant comes with many in the [examples directory](docs/examples), or you should take a look to the documentation. 
-Available examples:
+Ok, that was pretty simple, you may want something more powerful, right? Fair enough, Easy-vagrant comes with many configurations in the [examples directory](docs/examples), or you should take a look to the documentation. See the available examples:
 
 * Shell script provisionning
 * Command execution provisionning
@@ -57,8 +58,8 @@ Available examples:
 Easy-vagrant is extensively documented. Here is the entry point of the documentation:
 
 * Installation:
-  * [Install Vagrant and VirtualBox](https://www.google.ca/search?q=how+to+install+vagrant+libvirt)
-  * [Install Vagrant and Libvirt](https://www.google.ca/search?q=how+to+install+vagrant+libvirt)
+  * [Install Vagrant and VirtualBox](https://www.google.ca/search?q=How+to+install+vagrant+VirtualBox)
+  * [Install Vagrant and Libvirt](https://www.google.ca/search?q=How+to+install+vagrant+libvirt)
   * Install Vagrant and Docker (comming)
 * Documentation:
   * [Usage and examples](docs/usage.md)
