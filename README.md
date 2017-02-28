@@ -1,8 +1,9 @@
 # Easy-Vagrant
 
+![Easy-vagrant logo](docs/logo.png)
+
 Easy-vagrant is a ``Vagrantfile`` file under steroids. It mainly makes easy to design your instances with **yaml**, it **abstracts provider logic** and **reduce code duplication** for your configuration. It supports **Libvirt and VirtualBox** and can run on **most platforms**: GNU/Linux, Mac OSX and Windows. Easy-vagrant will simply ensure your configuration will run on any platform, with any provider.  
 
-> Easy-vagrant is still in development, some features will come in future releases.
 
 ---  
 
@@ -27,20 +28,44 @@ instances:
 ```
 Better than Ruby syntax, nah? So, let's go into it :-)
 
----
+> Easy-vagrant is still in development, some features will come in future releases.
 
-## Table of content
+## Quick start
+To follow this quick start guide, you must ensure you have at least VirtualBox and Vagrant installed on you computer:
 
-  * [Features](#features)
-  * [Quick start](#quick-start)
-  * [Documentation](#documentation)
-  * [Compatibility](#compatibility)
-  * [Releases](#releases)
-  * [Authors](#authors)
-  * [Alternatives](#alternatives)
-  * [Acknowledgments](#acknowledgments)
-  * [License](#license)
+```
+# Create your project directory from this repo
+git clone https://github.com/mrjk/vagrant-skel my_project
 
+# Go into your project
+cd my_project
+
+# Run Vagrant
+vagrant up
+```
+Ok, that was pretty simple, you may want something more powerful, right? Fair enough, Easy-vagrant comes with many in the [examples directory](docs/examples), or you should take a look to the documentation. 
+Available examples:
+
+* Shell script provisionning
+* Command execution provisionning
+* Simple Ansible playbook provisionning
+* Complex multi VM deployments
+* Inheritance examples
+
+
+## Documentation
+Easy-vagrant is extensively documented. Here is the entry point of the documentation:
+
+* Installation:
+  * [Install Vagrant and VirtualBox](https://www.google.ca/search?q=how+to+install+vagrant+libvirt)
+  * [Install Vagrant and Libvirt](https://www.google.ca/search?q=how+to+install+vagrant+libvirt)
+  * Install Vagrant and Docker (comming)
+* Documentation:
+  * [Usage and examples](docs/usage.md)
+  * [The ``vagrant.yml`` configuration](docs/configuration.md)
+  * [YAML specification](docs/object_definitions.md)
+  * [Default configuration](docs/default_configuration.md)
+  * [Contribute](docs/developpers.md)
 
 ## Features
 To let you more time to work on your project than on your development environment, Easy-vagrant comes with a lot of sexy features:
@@ -65,37 +90,6 @@ To let you more time to work on your project than on your development environmen
   - Mac OSX
   - Windows
 
-
-
-## Quick start
-To follow this quick start guide, you must ensure you have at least VirtualBox and Vagrant installed on you computer:
-
-```
-# Create your project directory from this repo
-git clone https://github.com/mrjk/vagrant-skel my_project
-
-# Go into your project
-cd my_project
-
-# Run Vagrant
-vagrant up
-```
-Ok, that was pretty simple, you may want something more powerful, right? Fair enough, Easy-vagrant comes with many in the [examples directory](docs/examples), or you should take a look to the documentation. 
-
-
-## Documentation
-Easy-vagrant is extensively documented. Here is the entry point of the documentation:
-
-* Installation:
-  * [Install Vagrant and VirtualBox](https://www.google.ca/search?q=how+to+install+vagrant+libvirt)
-  * [Install Vagrant and Libvirt](https://www.google.ca/search?q=how+to+install+vagrant+libvirt)
-  * Install Vagrant and Docker (comming)
-* Documentation:
-  * [Usage and examples](docs/usage.md)
-  * [The ``vagrant.yml`` configuration](docs/configuration.md)
-  * [Yaml specification](docs/object_definition.md)
-  * [Default configuration](docs/default_configuration.md)
-  * [Developpers](docs/developpers.md)
 
 ## Compatibility
 The following OS have been tested:
@@ -132,6 +126,8 @@ There are not so many alternatives, but we can mention:
 
 ## Acknowledgments
 The initial idea came to me when I was working for one of my customer. If I remember well, I made an initial version from the work of [Scott Lowe](http://blog.scottlowe.org/2016/01/14/improved-way-yaml-vagrant/). Since I lost this work into my archives, I made another version from this idea thanks to [Julian Gut](http://juliangut.com/blog/configure-vagrant-hosts-yaml). I was still unhappy with its approach, and I wanted something way much simpler (in term of files) and more powerful. Then Easy-vagrant came to life.
+
+The Vagrant logo belong to Hashicorp and the font is [Beautiful Every Time](http://www.fontspace.com/kimberly-geswein/beautiful-every-time) made by Kimberly Geswein.
 
 ## License
 
