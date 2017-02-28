@@ -132,5 +132,5 @@ The Vagrant logo belong to Hashicorp and the font is [Beautiful Every Time](http
 
 ## License
 
-Please read [GNU GENERAL PUBLIC LICENSE](LICENSE).
+Please read [GNU AFFERO GENERAL PUBLIC V3 LICENSE](LICENSE).
 

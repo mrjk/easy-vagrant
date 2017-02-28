@@ -3,7 +3,7 @@
 
 # Date: 2016/02/28
 # Version 0.5
-# License: GPLv3
+# License: AGPLv3
 # Author: mrjk
 # Source: https://github.com/mrjk/easy-vagrant
 # Contact: bXJqay43OCBbYXRdIGdtYWlsIFtkb3RdIGNvbQ==
