@@ -1,7 +1,28 @@
 # Easy-vagrant object definitions
 
-## Table of content
-[TOC]
+* [Legend](#legend)
+* [Settings](#settings)
+  + [root_data](#root-data)
+  + [settings_data](#settings-data)
+  + [default_data](#default-data)
+* [Objects](#objects)
+  + [provisionners_id](#provisionners-id)
+  + [provisionner_data](#provisionner-data)
+  + [box_id](#box-id)
+  + [flavor_id](#flavor-id)
+  + [flavor_data](#flavor-data)
+  + [instance_id](#instance-id)
+  + [instance_data](#instance-data)
+  + [port_data](#port-data)
+  + [provider_id](#provider-id)
+  + [provider_data](#provider-data)
+* [Merge strategy](#merge-strategy)
+  + [merge_strategy](#merge-strategy)
+  + [merge_data](#merge-data)
+* [Default](#default)
+  + [default_flavors](#default-flavors)
+  + [default_boxes](#default-boxes)
+  + [default_provisionners](#default-provisionners)
 
 ## Legend
 
