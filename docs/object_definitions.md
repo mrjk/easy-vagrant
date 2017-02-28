@@ -15,17 +15,12 @@ Some definitions may seems a bit cryptic in thses tables, so there is the defini
 ## Settings
 
 
-### provisionner_data
+### root_data
 | Key | Type | Required | Default | Context | Choices | Description |
 |-----|------|----------|---------|---------|---------|-------------|
 | settings | Hash | no | (inherited) | root | {settings_data} | Define the default settings of the file. | 
 | provisionners | Hash | no | (default_provisionners) | root | {provisionner_id}* | Define available provisionners. | 
 | instances | Hash | yes | {} | root | {instance_id}* | Define instance definitions. | 
-| Key | Type | Required | Default | Context | Choices | Description | 
-| type | String | yes |  | provisionner_data | Define which vagrant provisionner is used. | Define the provisionner name. | 
-| priority | Integer | no | 0 | provisionner_data | 0 to 100 | Define the loading priority order. Higher is loaded first. | 
-| description | String | no |  | provisionner_data |  | Set a description. This is not parsed. | 
-| params | Hash | yes |  | provisionner_data |  | Set the parameters for the provisionner. Refers to the provisionner documentation to know what settings are available. | 
 
 ### settings_data
 | Key | Type | Required | Default | Context | Choices | Description |
@@ -51,15 +46,11 @@ Some definitions may seems a bit cryptic in thses tables, so there is the defini
 ### provisionners_id
 | Key | Type | Required | Default | Context | Choices | Description |
 |-----|------|----------|---------|---------|---------|-------------|
-| $id | Hash | no |  | provisionners_def | {provisionner_data} | This creates a new provisionner. | 
+| $provisionner_id | Hash | no |  | provisionners_def | {provisionner_data} | This creates a new provisionner. | 
 
 ### provisionner_data
 | Key | Type | Required | Default | Context | Choices | Description |
 |-----|------|----------|---------|---------|---------|-------------|
-| settings | Hash | no | (inherited) | root | {settings_data} | Define the default settings of the file. | 
-| provisionners | Hash | no | (default_provisionners) | root | {provisionner_id}* | Define available provisionners. | 
-| instances | Hash | yes | {} | root | {instance_id}* | Define instance definitions. | 
-| Key | Type | Required | Default | Context | Choices | Description | 
 | type | String | yes |  | provisionner_data | Define which vagrant provisionner is used. | Define the provisionner name. | 
 | priority | Integer | no | 0 | provisionner_data | 0 to 100 | Define the loading priority order. Higher is loaded first. | 
 | description | String | no |  | provisionner_data |  | Set a description. This is not parsed. | 
@@ -68,12 +59,12 @@ Some definitions may seems a bit cryptic in thses tables, so there is the defini
 ### box_id
 | Key | Type | Required | Default | Context | Choices | Description |
 |-----|------|----------|---------|---------|---------|-------------|
-| $id | String | no |  | box_def | Atlas ID or URL | This creates a new box, with the reference or URL of the box. | 
+| $box_id | String | no |  | box_def | Atlas ID or URL | This creates a new box, with the reference or URL of the box. | 
 
 ### flavor_id
 | Key | Type | Required | Default | Context | Choices | Description |
 |-----|------|----------|---------|---------|---------|-------------|
-| $id | Hash | no |  | flavor_def | {flavor_data} | This define a flavor. | 
+| $flavor_id | Hash | no |  | flavor_def | {flavor_data} | This define a flavor. | 
 
 ### flavor_data
 | Key | Type | Required | Default | Context | Choices | Description |
@@ -85,7 +76,7 @@ Some definitions may seems a bit cryptic in thses tables, so there is the defini
 ### instance_id
 | Key | Type | Required | Default | Context | Choices | Description |
 |-----|------|----------|---------|---------|---------|-------------|
-| $id | Hash | no |  | instance_def | {instance_data} | Define one or more instance. | 
+| $instance_id | Hash | no |  | instance_def | {instance_data} | Define one or more instance. | 
 
 ### instance_data
 | Key | Type | Required | Default | Context | Choices | Description |
@@ -109,7 +100,7 @@ Some definitions may seems a bit cryptic in thses tables, so there is the defini
 ### provider_id
 | Key | Type | Required | Default | Context | Choices | Description |
 |-----|------|----------|---------|---------|---------|-------------|
-| $id | Hash | no |  | provider_def | {provider_data} | Define a provisionner | 
+| $provider_id | Hash | no |  | provider_def | {provider_data} | Define a provisionner | 
 
 ### provider_data
 | Key | Type | Required | Default | Context | Choices | Description |

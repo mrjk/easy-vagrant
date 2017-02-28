@@ -1,10 +1,10 @@
 ,"Note: Please use backtick (`) instead of colon (,)",,,,,,,
 ,,Configuration Structure,,,,,,
 ,,,,,,,,
-provisionner_data,Settings,Key,Type,Required,Default,Context,Choices,Description
-provisionner_data,Settings,settings,Hash,no,(inherited),root,{settings_data},Define the default settings of the file.
-provisionner_data,Settings,provisionners,Hash,no,(default_provisionners),root,{provisionner_id}*,Define available provisionners.
-provisionner_data,Settings,instances,Hash,yes,{},root,{instance_id}*,Define instance definitions.
+root_data,Settings,Key,Type,Required,Default,Context,Choices,Description
+root_data,Settings,settings,Hash,no,(inherited),root,{settings_data},Define the default settings of the file.
+root_data,Settings,provisionners,Hash,no,(default_provisionners),root,{provisionner_id}*,Define available provisionners.
+root_data,Settings,instances,Hash,yes,{},root,{instance_id}*,Define instance definitions.
 ,,,,,,,,
 ,,,,,,,,
 settings_data,Settings,Key,Type,Required,Default,Context,Choices,Description
@@ -25,7 +25,7 @@ default_data,Settings,provisionners,Hash,no,{},settings_data,{provisionner_id}*,
 ,,Objects,,,,,,
 ,,,,,,,,
 provisionners_id,Objects,Key,Type,Required,Default,Context,Choices,Description
-provisionners_id,Objects,$id,Hash,no,,provisionners_def,{provisionner_data},This creates a new provisionner.
+provisionners_id,Objects,$provisionner_id,Hash,no,,provisionners_def,{provisionner_data},This creates a new provisionner.
 ,,,,,,,,
 provisionner_data,Objects,Key,Type,Required,Default,Context,Choices,Description
 provisionner_data,Objects,type,String,yes,,provisionner_data,Define which vagrant provisionner is used.,Define the provisionner name.
@@ -35,11 +35,11 @@ provisionner_data,Objects,params,Hash,yes,,provisionner_data,,Set the parameters
 ,,,,,,,,
 ,,,,,,,,
 box_id,Objects,Key,Type,Required,Default,Context,Choices,Description
-box_id,Objects,$id,String,no,,box_def,Atlas ID or URL,This creates a new box` with the reference or URL of the box.
+box_id,Objects,$box_id,String,no,,box_def,Atlas ID or URL,This creates a new box` with the reference or URL of the box.
 ,,,,,,,,
 ,,,,,,,,
 flavor_id,Objects,Key,Type,Required,Default,Context,Choices,Description
-flavor_id,Objects,$id,Hash,no,,flavor_def,{flavor_data},This define a flavor.
+flavor_id,Objects,$flavor_id,Hash,no,,flavor_def,{flavor_data},This define a flavor.
 ,,,,,,,,
 flavor_data,Objects,Key,Type,Required,Default,Context,Choices,Description
 flavor_data,Objects,cpu,Integer,yes,,flavor_data,1 to N,Define instance CPU (vCPUs).
@@ -48,7 +48,7 @@ flavor_data,Objects,disk,Integer,yes,,flavor_data,1 to N,Define instance disk sp
 ,,,,,,,,
 ,,,,,,,,
 instance_id,Objects,Key,Type,Required,Default,Context,Choices,Description
-instance_id,Objects,$id,Hash,no,,instance_def,{instance_data},Define one or more instance.
+instance_id,Objects,$instance_id,Hash,no,,instance_def,{instance_data},Define one or more instance.
 ,,,,,,,,
 instance_data,Objects,Key,Type,Required,Default,Context,Choices,Description
 instance_data,Objects,box,String,no,(inherited),instance_data,{box_id},
@@ -67,7 +67,7 @@ port_data,Objects,protocol,String,no,tcp,port_data,tcp\|udp,Define protocol TCP 
 ,,,,,,,,
 ,,,,,,,,
 provider_id,Objects,Key,Type,Required,Default,Context,Choices,Description
-provider_id,Objects,$id,Hash,no,,provider_def,{provider_data},Define a provisionner
+provider_id,Objects,$provider_id,Hash,no,,provider_def,{provider_data},Define a provisionner
 ,,,,,,,,
 provider_data,Objects,Key,Type,Required,Default,Context,Choices,Description
 provider_data,Objects,settings,Hash,no,,provider_data,,Global settings of the provider. Check the provider documentation.
