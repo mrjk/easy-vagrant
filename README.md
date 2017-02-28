@@ -1,11 +1,12 @@
-# Easy-Vagrant
-
 ![Easy-vagrant logo](docs/logo.png)
 
 Easy-vagrant is a ``Vagrantfile`` file under steroids. It mainly makes easy to design your instances with **yaml**, it **abstracts provider logic** and **reduce code duplication** for your configuration. It supports **Libvirt and VirtualBox** and can run on **most platforms**: GNU/Linux, Mac OSX and Windows. Easy-vagrant will simply ensure your configuration will run on any platform, with any provider.  
 
 
----  
+> Easy-vagrant is still in development, some features will come in future releases.
+
+
+# Easy-Vagrant
 
 As a configuration example is worth a thousand words, there is the way to spin 3 vanilla instances: 2 Centos and one deploy machine under Debian:
 
@@ -28,7 +29,6 @@ instances:
 ```
 Better than Ruby syntax, nah? So, let's go into it :-)
 
-> Easy-vagrant is still in development, some features will come in future releases.
 
 ## Quick start
 To follow this quick start guide, you must ensure you have at least VirtualBox and Vagrant installed on you computer:
