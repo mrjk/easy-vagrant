@@ -1,101 +1,139 @@
-
 # Easy-Vagrant
 
-Easy-vagrant is a vagrant configuration file under steroids. It mainly resolve some problematic to spin up very quickly one or many base OS instance. It's is mainly a tool for devops then.
+Easy-vagrant is a ``Vagrantfile`` file under steroids. It mainly makes easy to design your instances with **yaml**, it **abstracts provider logic** and **reduce code duplication** for your configuration. It supports **Libvirt and VirtualBox** and can run on **most platforms**: GNU/Linux, Mac OSX and Windows. Easy-vagrant will simply ensure your configuration will run on any platform, with any provider.  
 
-The goal is to be able to spinup very quickly some base OS. à la docker, but with your favourite provider (LibVirt and Vagrant).
+> Easy-vagrant is still in development, some features will come in future releases.
 
-----------
+---  
 
-[TOC]
+As a configuration example is worth a thousand words, there is the way to spin 3 vanilla instances: 2 Centos and one deploy machine under Debian:
+
+```
+---
+settings:
+  defaults:
+    flavor: tiny
+    box: centos7
+
+instances:
+  deploy:
+    box: debian8
+    cpu: 1
+  web:
+    number: 2
+    ports:
+      - guest: 80
+        host: 8080
+```
+Better than Ruby syntax, nah? So, let's go into it :-)
+
+---
+
+## Table of content
+
+  * [Features](#features)
+  * [Quick start](#quick-start)
+  * [Documentation](#documentation)
+  * [Compatibility](#compatibility)
+  * [Releases](#releases)
+  * [Authors](#authors)
+  * [Alternatives](#alternatives)
+  * [Acknowledgments](#acknowledgments)
+  * [License](#license)
+
 
 ## Features
+To let you more time to work on your project than on your development environment, Easy-vagrant comes with a lot of sexy features:
+
+- Designed for devops:
+  - Comes with nifty defaults
+  - Preset of base boxes for most Linux distros
+  - Provide a generic configuration
+  - Everything is customizable
+  - Extendable
+- Simple configuration syntax:
+  - Yaml syntax
+  - Avoid code duplication by design
+  - Global and user configuration
+  - Configuration override mechanism
 - Multi provider support:
   - Libvirt
   - VirtualBox
-  - Docker (comming)
-- Easy configuration with yaml
-  - Comes with nifty defaults
-  - Allow a developer configuration
-  - Allow final user to overrides some settings to its local environment
-  - No code redundancy
-- Virtually allow any providers within yaml definitions
-- Comes with a preset of base images
-- Everything is customizable
+  - Docker (coming soon)
+- Multi OS support:
+  - GNU/Linux
+  - Mac OSX
+  - Windows
+
 
 
 ## Quick start
+To follow this quick start guide, you must ensure you have at least VirtualBox and Vagrant installed on you computer:
 
-## File structure
+```
+# Create your project directory from this repo
+git clone https://github.com/mrjk/vagrant-skel my_project
+
+# Go into your project
+cd my_project
+
+# Run Vagrant
+vagrant up
+```
+Ok, that was pretty simple, you may want something more powerful, right? Fair enough, Easy-vagrant comes with many in the [examples directory](docs/examples), or you should take a look to the documentation. 
+
+
+## Documentation
+Easy-vagrant is extensively documented. Here is the entry point of the documentation:
+
+* Installation:
+  * [Install Vagrant and VirtualBox](https://www.google.ca/search?q=how+to+install+vagrant+libvirt)
+  * [Install Vagrant and Libvirt](https://www.google.ca/search?q=how+to+install+vagrant+libvirt)
+  * Install Vagrant and Docker (comming)
+* Documentation:
+  * [Usage and examples](docs/usage.md)
+  * [The ``vagrant.yml`` configuration](docs/configuration.md)
+  * [Yaml specification](docs/object_definition.md)
+  * [Default configuration](docs/default_configuration.md)
+  * [Developpers](docs/developpers.md)
 
 ## Compatibility
 The following OS have been tested:
 
-- fedora23 with LibVirt
-- OSx Mountain Lion with VirtualBox
+- Fedora23 with LibVirt
+- OSX Mountain Lion with VirtualBox
+- Windows 8
 
 If you plan to use with libvirt, you will need the following dependencies:
 
-- fog
-- vagrant-libvirt plugin
-
-## Alternatives
-There are not so many alternatives, but we can mention:
-
-- [Oh-My-Vagrant](https://github.com/purpleidea/oh-my-vagrant) made by James.
-
-## Contributing
-
-To help colaborators to work on it, we assume the following convention:
-
-* **Feat**: A new feature
-* **Fix**: A bug fix
-* **Change**: A behaviour
-* **Docs**: Documentation only changes
-* **Style**: Changes that do not affect the meaning of the code (white-space, formatting, missing
-  seMi-colons, etc)
-* **Refactor**: A code change that neither fixes a bug nor adds a feature
-* **Clean**: A portion of legacy code
-* **Perf**: A code change that improves performance
-* **Test**: Adding missing or correcting existing tests
-* **Chore**: Changes to the build process or auxiliary tools and libraries such as documentation
-  generation
-
-
-Each commit message must have a maximum lenght of 72 characters. The title must follow the imperative at the present tense. The title must start with an uppercase letter, and there is no dot at the end of the sentence. An easy way to remember is: ''if applied, this commit will <commit_title>''. Optionnaly, it is a good practice to add some explanations of what the commit do.
+- fog ruby library
+- [vagrant-libvirt plugin](https://github.com/vagrant-libvirt/vagrant-libvirt)
 
 
 ## Releases
 
 - 0.5 - ../../..
-  - Initial version
+  - Initial release
+
+## Authors
+
+* **[mrjk](http://jeznet.org)**: Initial work
+
+See also the list of [contributors](https://github.com/mrjk/vagrant-skel/graphs/contributors) who participated in this project.
 
 
+## Alternatives
+There are not so many alternatives, but we can mention:
+
+- [Oh-My-Vagrant](https://github.com/purpleidea/oh-my-vagrant) made by James.
+- [vagrantMultiHost](https://github.com/juliangut/vagrantMultiHost ) by Julian Gut.
+- [Vagrant-Up](https://github.com/Mayccoll/Vagrant-Up) by Mayccoll
+
+
+## Acknowledgments
+The initial idea came to me when I was working for one of my customer. If I remember well, I made an initial version from the work of [Scott Lowe](http://blog.scottlowe.org/2016/01/14/improved-way-yaml-vagrant/). Since I lost this work into my archives, I made another version from this idea thanks to [Julian Gut](http://juliangut.com/blog/configure-vagrant-hosts-yaml). I was still unhappy with its approach, and I wanted something way much simpler (in term of files) and more powerful. Then Easy-vagrant came to life.
 
 ## License
 
 Please read [GNU GENERAL PUBLIC LICENSE](LICENSE).
-
-## Credits
-The initial idea came to me when I was working for one of my customer. If I remember well, I made an initial version from the work of [Scott Lowe](http://blog.scottlowe.org/2016/01/14/improved-way-yaml-vagrant/). Since I lost this work into my archives, I made a new version from this idea thanks to [Julian Gut](http://juliangut.com/blog/configure-vagrant-hosts-yaml). I was still unhappy with its approach, and I wanted something way mush simpler (in term of files) and more powerful. Then easy-vagrant came to life.
-
-Easy-vagrant is a sort of vagrant-skel, obviously made by skel (:
-``` text
-           .-.
- {`:      (o.O)
-  \\       |~|
-   \\     __|__
-     o===o.=|=.o\
-          .=|=. \\
-          .=|=. ::}
-           _=_
-          ( _ )
-          || ||
-          || ||
-          () ()
-          || ||
-          || ||
-         ==' '==
-```
-Inspired from l42 work.
 
