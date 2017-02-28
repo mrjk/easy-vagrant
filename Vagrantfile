@@ -1,11 +1,12 @@
 # -*- mode: ruby -*-
 # vim: set ft=ruby  tabstop=2 softtabstop=0 expandtab shiftwidth=2 smarttab :
-# vi: set ft=ruby  tabstop=2 softtabstop=0 expandtab shiftwidth=2 smarttab :
 
-# Date: 2015/12/16
+# Date: 2016/02/28
 # Version 0.5
-# License: MIT
-# Author: mrjk[dot]78[at]gmail[dot]com
+# License: GPLv3
+# Author: mrjk
+# Source: https://github.com/mrjk/easy-vagrant
+# Contact: bXJqay43OCBbYXRdIGdtYWlsIFtkb3RdIGNvbQ==
 
 
 
@@ -13,11 +14,14 @@
 # Simplified vagrant architecture spwaner
 ########################################
 
-# Please edit the "arch.yml" file to build your own architecture.
+# Please edit the "conf/vagrant.yml" file to build your own architecture.
 # Do not edit what's bellow unless you know what you do (and Ruby)
+
+
 Vagrant.require_version ">= 1.7.0"
 VAGRANTFILE_API_VERSION = "2"
 require 'yaml'
+
 
 # Internal variables
 show_banner = true
@@ -25,7 +29,6 @@ dry_run = true
 show_config_merged = true
 show_config_parsed = true
 show_config_instances = true
-
 
 
 ########################################
@@ -226,11 +229,8 @@ def attribute_is_defined(object, key)
 end
 
 
-# This function is used to merge recursively two hashes. The
-# right array always win except when a '*_' key is found 
-# which can override the default behavior. See the documentation
-# for usage and complete examples. Return the merged array.
-
+# This function helps to retrieve the merge strategy key. 
+# Returns a Hash with merge settings.
 def get_merge_params(hash, key)
 
   merge_string = '_'
@@ -258,6 +258,11 @@ def get_merge_params(hash, key)
 
 end
 
+
+# This function is used to merge recursively two hashes. The
+# right array always win except when a '*_' key is found 
+# which can override the default behavior. See the documentation
+# for usage and complete examples. Return the merged array.
 
 def merge_recursively(o_src, o_over, p=nil)
   # o_src for source object
@@ -288,17 +293,17 @@ def merge_recursively(o_src, o_over, p=nil)
   case action
 
   when 'replace'
-    # GOOD NAME: replace
+    # Human name: replace
     # Return inconditionnaly the overriding object, even if undefined/empty.
     result = o_over
 
   when 'unset'
-    # GOOD NAME: unset
+    # Human name: unset
     # Unset the value
     result = nil
 
   when 'union'
-    # GOOD NAME: merge
+    # Human name: merge
     # Merge all objects, existing object are overrided
 
     # Is overrinding object equal nil or empty?
@@ -320,7 +325,7 @@ def merge_recursively(o_src, o_over, p=nil)
     end
 
   when 'intersect'
-    # GOOD NAME: common
+    # Human name: common
     # Merge only common objects, existing object are overrided
 
     # Is overrinding object equal nil ?
@@ -341,7 +346,7 @@ def merge_recursively(o_src, o_over, p=nil)
     end
 
   when 'difference'
-    # GOOD NAME: exclude
+    # Human name: exclude
     # Remove all listed objects, existing object are overrided
 
     # Is overrinding object equal nil ?
@@ -372,7 +377,7 @@ def merge_recursively(o_src, o_over, p=nil)
     end
 
   when 'complement'
-    # GOOD NAME: invert
+    # Human name: invert
     # Remove all listed objects, existing object are overrided, new objects are discarded if not previously defined
 
     # Is overrinding object equal nil ?
@@ -447,15 +452,13 @@ if File.file?('conf/vagrant.yml')
   conf_merged = merge_recursively(conf_merged, YAML.load_file('conf/vagrant.yml') )
 end
 
-
 # Load user configuration
 if File.file?('local.yml')
   conf_merged = merge_recursively(conf_merged, YAML.load_file('local.yml') )
 end
 
-
+# Display configuration if requested
 if show_config_merged 
-  # Dump configuration
   puts "NOTICE: This is the merged raw configuration:"
   print YAML::dump(conf_merged)
 end
@@ -470,8 +473,6 @@ conf_final = {}
 
 # Settings: Boxes
 # =====================
-#
-
 
 conf_final['providers'] = conf_merged['settings']['providers']
 
@@ -499,17 +500,19 @@ end
 # =====================
 conf_final['instances'] = {}
 
+# Check for defined instances
 if not conf_merged.has_key?('instances')
   print "ERROR: No instances are defined.\n"
   exit 1 
 end
 
+# Iterate over instances
 conf_merged['instances'].each do |key, value|
 
   vm_config = {}
 
 
-  # Manage flavors
+  # Manage flavors and key parameters
   # =====================
  
   # Get flavor name (default value)
@@ -542,10 +545,6 @@ conf_merged['instances'].each do |key, value|
     vm_config['disk'] = conf_merged['settings']['flavors'][vm_flavor]['disk'] 
   end
 
-
-  # Manage flavors
-  # =====================
- 
   # Define box
   if attribute_is_defined(value, 'box')
     vm_config['box'] = value['box']
@@ -553,7 +552,8 @@ conf_merged['instances'].each do |key, value|
     vm_config['box'] = conf_merged['settings']['defaults']['box'] 
   end
 
-  # Manage ports
+
+  # Manage VirtualBox ports
   # =====================
   vm_config['ports'] = []
   if attribute_is_defined(value, 'ports')
@@ -583,9 +583,6 @@ conf_merged['instances'].each do |key, value|
       end
     end
   end
-
-
- 
 
 
   # Manage provisionners
@@ -631,7 +628,6 @@ conf_merged['instances'].each do |key, value|
 
   # Reverse sort provisionners
   vm_config['provisionners'] = vm_provisionners.sort_by { |name, settings| settings['priority'] }.reverse.to_h
-
 
 
   # Manage instance number
@@ -680,6 +676,7 @@ if dry_run
   puts "NOTICE: Dry run mode enabled, not going to Vagrant."
   exit 0
 end
+
 
 ########################################
 # Magic business
@@ -734,7 +731,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       # =====================
       instance.vm.provider "libvirt" do |l, o|
 
-        # instanceure provider
+        # Instance provider
         l.cpus = value["cpu"].to_i
         l.memory = value["memory"].to_i
         l.nested = true
@@ -744,7 +741,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         # Override
         o.vm.box = conf_final['providers']['libvirt']['boxes'][value["box"]]
 
-
       end
     
 
@@ -752,7 +748,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       # =====================
       instance.vm.provider "virtualbox" do |v, o|
 
-        # instanceure provider
+        # Instance provider
         v.customize ["modifyvm", :id, "--cpus", value["cpu"]]
         v.customize ["modifyvm", :id, "--memory", value["memory"]]
         v.customize ["modifyvm", :id, "--usb", "off"]
@@ -761,7 +757,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         # Override
         o.vm.box = conf_final['providers']['virtualbox']['boxes'][value["box"]]
 
-        # open network ports
+        # Open network ports
         value['ports'].each do |port|
           o.vm.network 'forwarded_port', guest: port['guest'], host: port['host'], protocol: port['protocol'], auto_correct: true
         end
@@ -780,165 +776,3 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
 end
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#################### OLD DEPRECATED
-
-#       # I do not recommand you to use virtualbox, network settings are f***ing buggy/broken ...
-#       config.vm.provider "libvirt"
-#       config.vm.provider "virtualbox"
-#     
-#     
-#       # Configure default box
-#       config.vm.box = "chef/centos-7.1"
-#       config.vm.provider "libvirt" do |v, override|
-#         override.vm.box = "dliappis/centos7minlibvirt"
-#         #override.vm.box = "GeeMedia/CentOS-7.1"
-#       end
-#     
-#     #  config.vm.provider "libvirt" do |libvirt|
-#     #    libvirt.connect_via_ssh = true
-#     #    libvirt.host = arch["hyp_host"]
-#     #    libvirt.username = arch["hyp_username"]
-#     #    libvirt.id_ssh_key_file = arch["hyp_key"]
-#     #  end
-#     
-#     
-#     # VirtualBox settings:
-#       #
-#       # Vagrant.configure("2") do |config|
-#       #   config.vm.network "private_network", ip: "192.168.50.4",
-#       #     virtualbox__intnet: "mynetwork"
-#       #   config.vm.network "private_network", ip: "192.168.50.4", nic_type: "virtio"
-#       # end
-#       #
-#       # config.vm.provider "virtualbox" do |v|
-#       # 	v.name = "my_vm"
-#       # 	v.linked_clone = true if Vagrant::VERSION =~ /^1.8/
-#       # 	v.customize ["modifyvm", :id, "--cpuexecutioncap", "50"]
-#       # 	v.customize ["modifyvm", :id, "--memory", "512"]
-#       # 	v.customize ["modifyvm", :id, "--pagefusion", "on"]
-#       # 	v.customize ["modifyvm", :id, "--acpi", "on"]
-#       # 	v.customize ["modifyvm", :id, "--cpus", "2"]
-#       # 	v.customize ["modifyvm", :id, "--cpuhotplug", "2"]
-#       # 	v.customize ["modifyvm", :id, "--pae", "on"]
-#       # 	v.customize ["modifyvm", :id, "--largepages", "on"]
-#       # 	v.customize ["modifyvm", :id, "--guestmemoryballoon", "128"]
-#       # 	v.customize ["modifyvm", :id, "--pae", "on"]
-#       # end
-#       #
-#       #
-#       # Docker:
-#       # Vagrant.configure("2") do |config|
-#       # 	# v2 configs...
-#       #
-#       #   config.vm.provider "docker" do |d|
-#       #   	  # Required (at least one of them)
-#       #       d.image = "foo/bar"
-#       #       d.build_dir = "."
-#       #
-#       #       # optional
-#       #       build_args = 
-#       #       cmd = 
-#       #       create_args= 
-#       #       env = 
-#       #       expose = 
-#       #       link = 
-#       #       force_host_vm = 
-#       #       pull = false
-#       #       remains_running = true
-#       #       stop_timeout = 30
-#       #       volumes = 
-#       #
-#       #       email =
-#       #       username =
-#       #       password = 
-#       #       auth_server = 
-#       #       dockerfile = 
-#       #
-#       #   end
-#       # end
-#       # config.vm.provider "docker" do |d|
-#       #     d.image = "vm_name of the container"
-#       #       end
-#       #
-#       # Libvirt:
-#       # memory
-#       # cpus
-#       # nested
-#       # volume_cache = unsafe
-#       # keymap = 
-#       # machine_virtual_size = 20G
-#       # libvirt.random :model => 'random'
-#       #
-#       # net config:
-#       # 	:libvirt__network_name:
-#       # 	:libvirt__netmask
-#       # 	:libvirt__host_ip
-#       # 	:libvirt__forward_mode: nat
-#       # 	:libvirt__forward_device
-#       # 	:libvirt__guest_ipv6: no
-#       # 	:model_type = virtio
-#       #
-#     
-#     
-#       # Turn off shared folders
-#       config.vm.synced_folder ".", "/vagrant", id: "vagrant-root", disabled: true
-#     
-#     
-#       # Enable ansible provisionning
-#       config.vm.provision "ansible" do |ansible|
-#         ansible.sudo = true
-#         ansible.extra_vars = { ansible_ssh_user: 'vagrant' }
-#         #ansible.playbook = "../../deployment/rcp_deploy_arch.yml"
-#         ansible.host_key_checking = false
-#         ansible.playbook = arch["ansible_playbook"]
-#         ansible.groups = arch["ansible_groups"]
-#       end
-#     
-#       # Load each boxes
-#       arch["boxes"].each do |name, opts|
-#         config.vm.define name + arch["boxes_suffix"] do |config|
-#     
-#           # Define VM
-#           config.vm.hostname = name + arch["boxes_suffix"]
-#           config.vm.network :private_network, :ip => opts["ipaddr"], :libvirt__netmask => opts["ipnetmask"]
-#     
-#           # Define VM properties (LibVirt)
-#           config.vm.provider "libvirt" do |l|
-#             l.memory = opts["mem"]
-#             l.cpus = opts["cpu"]
-#           end
-#     
-#           # Define VM properties (VirtualBox)
-#           config.vm.provider "virtualbox" do |v|
-#             v.customize ["modifyvm", :id, "--memory", opts[:mem]]
-#             v.customize ["modifyvm", :id, "--cpus", opts[:cpu]]
-#           end
-#     
-#           # Change the default interface of the VM
-#     #      config.vm.provision "shell", inline: "ip route delete default 2>&1 >/dev/null || true; ip route add default via " + opts["ipgateway"]
-#     #      config.vm.provision "shell", inline: "sed -i 's/DEFROUTE=.*/DEFROUTE=no/' /etc/sysconfig/network-scripts/ifcfg-eth0"
-#     #      config.vm.provision "shell", inline: "grep 'device=eth0' /etc/sysconfig/network-scripts/ifcfg-eth0 || echo device=eth0 >> /etc/sysconfig/network-scripts/ifcfg-eth0"
-#     #      config.vm.provision "shell", inline: "grep 'DEFROUTE=yes' /etc/sysconfig/network-scripts/ifcfg-eth1 || echo DEFROUTE=yes >> /etc/sysconfig/network-scripts/ifcfg-eth1"
-#     #      config.vm.provision "shell", inline: "yum remove -q -y NetworkManager || echo 'NetworkManager already removed'"
-#     
-#         end
-#       end
-#     end
-#     
-
-#
-#
