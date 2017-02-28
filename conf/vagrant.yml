@@ -1,14 +1,15 @@
 # vim: tabstop=2 softtabstop=0 expandtab shiftwidth=2 smarttab :
 ---
 
-instances:
-  centos7:
+settings:
+  defaults:
+    flavor: tiny
     box: centos7
+
+instances:
+  deploy:
+    box: debian8
     cpu: 1
     memory: 512
-    disk: 30
-#  debian8:
-#    box: debian8
-#  ubuntu1604:
-#    box: ubuntu1604
-
+  web:
+    number: 2
