@@ -14,7 +14,7 @@ As a configuration example is worth a thousand words, there is the way to spin 3
 ---
 settings:
   defaults:
-    flavor: tiny
+    flavor: micro
     box: centos7
 
 instances:
