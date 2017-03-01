@@ -25,9 +25,9 @@ require 'yaml'
 
 # Internal variables
 show_banner = true
-dry_run = true
-show_config_merged = true
-show_config_parsed = true
+dry_run = false
+show_config_merged = false
+show_config_parsed = false
 show_config_instances = true
 
 
@@ -511,6 +511,9 @@ conf_merged['instances'].each do |key, value|
 
   vm_config = {}
 
+  # Do some basic checks
+  # ====================
+
 
   # Manage flavors and key parameters
   # =====================
@@ -524,63 +527,87 @@ conf_merged['instances'].each do |key, value|
     vm_flavor = conf_merged['settings']['defaults']['flavor']
   end
 
+  # Check flavor existance
+  if not attribute_is_defined(conf_merged['settings']['flavors'],vm_flavor)
+    print "ERROR: Flavor '", vm_flavor, "' is not defined.\n"
+    exit 1
+  end
+
+
   # Define cpu
-  if attribute_is_defined(value, 'cpu')
+  if attribute_is_defined(value, 'cpu') and value['cpu'].to_i > 0
     vm_config['cpu'] = value['cpu']
-  else
+  elsif conf_merged['settings']['flavors'][vm_flavor]['cpu'].to_i > 0
     vm_config['cpu'] = conf_merged['settings']['flavors'][vm_flavor]['cpu']
+  else
+    vm_config['cpu'] = 1
+    print "WARN: Cpu for instance '", key, "' is not valid. Fall back to 1 cpu.\n"
   end
 
   # Define memory
-  if attribute_is_defined(value, 'memory')
+  if attribute_is_defined(value, 'memory') and value['memory'].to_i > 0
     vm_config['memory'] = value['memory']
-  else
+  elsif conf_merged['settings']['flavors'][vm_flavor]['memory'].to_i > 0
     vm_config['memory'] = conf_merged['settings']['flavors'][vm_flavor]['memory']
+  else
+    vm_config['memory'] = 512
+    print "WARN: Memory for instance '", key, "' is not valid. Fall back to 512 (Mb).\n"
   end
 
   # Define disk
-  if attribute_is_defined(value, 'disk')
+  if attribute_is_defined(value, 'disk') and value['memory'].to_i > 0
     vm_config['disk'] = value['disk']
-  else
+  elsif conf_merged['settings']['flavors'][vm_flavor]['disk'].to_i > 0
     vm_config['disk'] = conf_merged['settings']['flavors'][vm_flavor]['disk'] 
+  else
+    vm_config['disk'] = 10
+    print "WARN: Disk for instance '", key, "' is not valid. Fall back to 10 (Gb).\n"
   end
 
   # Define box
-  if attribute_is_defined(value, 'box')
+  if attribute_is_defined(value, 'box') and attribute_is_defined(conf_merged['settings']['boxes'], value['box'])
     vm_config['box'] = value['box']
-  else
+  elsif attribute_is_defined(conf_merged['settings']['boxes'],conf_merged['settings']['defaults']['box'])
     vm_config['box'] = conf_merged['settings']['defaults']['box'] 
+  else
+    print "ERROR: Box '", conf_merged['settings']['defaults']['box'] ,"' for '", key, "' is not valid.\n"
+    exit 1
   end
 
 
   # Manage VirtualBox ports
   # =====================
   vm_config['ports'] = []
-  if attribute_is_defined(value, 'ports')
+  if attribute_is_defined(value, 'ports') 
+    
+    if value['ports'].class == Hash
 
-    value['ports'].each do |port|
+      value['ports'].each do |port|
 
-      if port.has_key?('guest') and port.has_key?('host') \
-       and port['guest'].to_i > 0 and port['host'].to_i > 0
+        if port.has_key?('guest') and port.has_key?('host') \
+         and port['guest'].to_i > 0 and port['host'].to_i > 0
 
-        # TODO: Check if port is already defined/used and warn user
+          # TODO: Check if port is already defined/used and warn user
 
-        p = {}
-        p['guest'] = port['guest'].to_i
-        p['host'] = port['host'].to_i
+          p = {}
+          p['guest'] = port['guest'].to_i
+          p['host'] = port['host'].to_i
 
-        if port.has_key?('protocol') \
-          and ( port['protocol'] == 'tcp' or port['protocol'] == 'udp' )
+          if port.has_key?('protocol') \
+            and ( port['protocol'] == 'tcp' or port['protocol'] == 'udp' )
 
-          p['protocol'] = port['protocol']
+            p['protocol'] = port['protocol']
 
-        else
-          p['protocol'] = 'tcp'
+          else
+            p['protocol'] = 'tcp'
+          end
+
+          vm_config['ports'].push(p)
+
         end
-
-        vm_config['ports'].push(p)
-
       end
+    else
+      print "WARN: Ports list for instance '", key, "' should be a list of hashes, not '", value['ports'].class ,"'.\n"
     end
   end
 
@@ -634,7 +661,7 @@ conf_merged['instances'].each do |key, value|
   # =====================
  
   # Detect how many instances
-  if attribute_is_defined(value, 'number') and value['number'] > 1
+  if attribute_is_defined(value, 'number') and value['number'].to_i > 1
 
     # Generate the request number of instances
     for number in 1..value['number'] do
@@ -659,14 +686,12 @@ end
 
 # Show debugging
 if show_config_instances
-  puts
   puts "NOTICE: This is the instances configuration:"
   print YAML::dump(conf_final['instances'])
 end
 
 # Show debugging
 if show_config_parsed
-  puts
   puts "NOTICE: This is the final configuration:"
   print YAML::dump(conf_final)
 end
