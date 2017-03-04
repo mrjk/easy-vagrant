@@ -136,12 +136,12 @@ Some definitions may seems a bit cryptic in thses tables, so there is the defini
 ### merge_strategy
 | Key | Type | Required | Default | Context | Choices | Description |
 |-----|------|----------|---------|---------|---------|-------------|
-| $key_ | Hash or String | no | union | any | union\|replace\|unset\|intersect\|{merge_data} | Define a merge strategy on this key. The key must be appended with _. | 
+| $key_ | Hash or String | no | union | any | union\|replace\|unset\|inherit\|intersect\|{merge_data} | Define a merge strategy on this key. The key must be appended with _. | 
 
 ### merge_data
 | Key | Type | Required | Default | Context | Choices | Description |
 |-----|------|----------|---------|---------|---------|-------------|
-| action | String | no | union | merge_strategy | union\|replace\|unset\|intersect\|difference\|complement | Define the merge strategy | 
+| action | String | no | union | merge_strategy | union\|replace\|unset\|inherit\|intersect\|difference\|complement | Define the merge strategy | 
 | options | Array or Hash | Yes if complement\|difference | {} | merge_strategy | {$key_id}* | Define the concerned keys | 
 
 ## Default

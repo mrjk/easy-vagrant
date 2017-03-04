@@ -324,8 +324,30 @@ def merge_recursively(o_src, o_over, p=nil)
       result =  o_over
     end
 
-  when 'intersect'
+  when 'inherit'
     # Human name: common
+    # Merge only new objects, discard parent objects
+
+    # Is overrinding object equal nil ?
+    if o_over == nil or o_over.to_s.empty?
+      result = o_src
+
+    # Are both object Hash ?
+    elsif o_src.class == Hash and o_over.class == Hash
+
+      result = merge_recursively(o_src, o_over, 'union')
+
+      # Delete key
+      result = result.delete_if {|k, v|
+        not o_over.has_key?(k)
+      }
+
+    else
+      result = nil
+    end
+
+  when 'intersect'
+    # Human name: common only
     # Merge only common objects, existing object are overrided
 
     # Is overrinding object equal nil ?
@@ -619,8 +641,11 @@ conf_merged['instances'].each do |key, value|
 
   # Detect which provisionners should be applied on instance
   if conf_merged['settings']['defaults']['provisionners'] != {}
-    vm_provisionners = merge_recursively(conf_merged['settings']['defaults']['provisionners'],conf_merged['provisionners'], 'intersect')
+    vm_provisionners = merge_recursively(conf_merged['provisionners'], conf_merged['settings']['defaults']['provisionners'], 'inherit')
   end 
+
+  puts vm_provisionners
+  abort
 
   # Merge instance provisionners with global provisionners
   vm_provisionners.each do |name, settings|

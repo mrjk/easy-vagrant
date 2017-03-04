@@ -208,6 +208,7 @@ Merge strategy:
 - ``union`` (merge):  This is a simple recursive merge, child value takes precedence when non empty.
 - ``replace`` (replace): Replace unconditionally the parent value.
 - ``unset`` (unset): Unset the key.
+- ``inherit`` (inherit): Merge only child object, discard parent objects.
 - ``intersect`` (common): Keep only common objects defined in both parent in child. Other are discarded.
 - ``difference`` (exclude [list]): Remove a list of objects if present in parent, the resulting list is merged (``union``) with child objects.
 - ``complement`` (invert [list]): Invert a list of objects if present in parent, the resulting list is merged (``union``) with child objects only if they were present in parent.

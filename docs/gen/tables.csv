@@ -77,11 +77,11 @@ provider_data,Objects,boxes,Hash,no,,provider_data,{box_id}*,Override default bo
 ,,Merge strategy,,,,,,
 ,,,,,,,,
 merge_strategy,Merge strategy,Key,Type,Required,Default,Context,Choices,Description
-merge_strategy,Merge strategy,$key_,Hash or String,no,union,any,union\|replace\|unset\|intersect\|{merge_data},Define a merge strategy on this key. The key must be appended with _.
+merge_strategy,Merge strategy,$key_,Hash or String,no,union,any,union\|replace\|unset\|inherit\|intersect\|{merge_data},Define a merge strategy on this key. The key must be appended with _.
 ,,,,,,,,
 ,,,,,,,,
 merge_data,Merge strategy,Key,Type,Required,Default,Context,Choices,Description
-merge_data,Merge strategy,action,String,no,union,merge_strategy,union\|replace\|unset\|intersect\|difference\|complement,Define the merge strategy
+merge_data,Merge strategy,action,String,no,union,merge_strategy,union\|replace\|unset\|inherit\|intersect\|difference\|complement,Define the merge strategy
 merge_data,Merge strategy,options,Array or Hash,Yes if complement\|difference,{},merge_strategy,{$key_id}*,Define the concerned keys
 ,,,,,,,,
 ,,,,,,,,
