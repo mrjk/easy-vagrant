@@ -644,9 +644,6 @@ conf_merged['instances'].each do |key, value|
     vm_provisionners = merge_recursively(conf_merged['provisionners'], conf_merged['settings']['defaults']['provisionners'], 'inherit')
   end 
 
-  puts vm_provisionners
-  abort
-
   # Merge instance provisionners with global provisionners
   vm_provisionners.each do |name, settings|
 
