@@ -2,4 +2,16 @@
 
 - hosts: all
   tasks:
-  - debug: msg="Ansible works!"
+
+  - name: Debug test
+    debug: msg="Ansible works!"
+
+  - name: Fix RHEL network issue
+    become: yes 
+    copy:
+      dest: "/etc/sysconfig/network-scripts/ifcfg-{{ ansible_default_ipv4.interface }}"
+      content: |
+        DEVICE={{ ansible_default_ipv4.interface }}
+        BOOTPROTO=dhcp
+        ONBOOT=yes
+    when: ansible_os_family ==  'RedHat'        
