@@ -35,7 +35,7 @@ To follow this quick start guide, you must ensure you have at least Vagrant and 
 
 ```
 # Create your project directory from this repo
-git clone https://github.com/mrjk/vagrant-skel my_project
+git clone --depth=1 https://github.com/mrjk/vagrant-skel my_project
 
 # Go into your project
 cd my_project
