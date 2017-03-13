@@ -1,2 +1,6 @@
 /local.yml
 /.vagrant
+
+# Enabled while easy-vagrant is in beta ...
+/conf/vagrant.yml
+
