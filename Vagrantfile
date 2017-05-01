@@ -205,7 +205,7 @@ conf_default = {
       'description' => 'Deploy an SSH pubkey to specific user',
       'params' => {
         'playbook' => 'conf/ansible/deploy_key.yml',
-        'params' => {
+        'extra_vars' => {
           'target_user' => 'root',
         },
       },
