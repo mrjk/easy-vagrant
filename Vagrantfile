@@ -193,11 +193,21 @@ conf_default = {
         'privileged' => true,
       },
     },
-    'test_ansible' => {
+    'ansible_test' => {
       'type' => 'ansible',
-      'description' => 'This run an Ansible playbook',
+      'description' => 'Test Ansible run correctly',
       'params' => {
-        'playbook' => 'conf/ansible/playbook.yml',
+        'playbook' => 'conf/ansible/test.yml',
+      },
+    },
+    'ansible_deploy_key' => {
+      'type' => 'ansible',
+      'description' => 'Deploy an SSH pubkey to specific user',
+      'params' => {
+        'playbook' => 'conf/ansible/deploy_key.yml',
+        'params' => {
+          'target_user' => 'root',
+        },
       },
     },
   },

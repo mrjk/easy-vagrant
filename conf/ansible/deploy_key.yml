@@ -1,0 +1,22 @@
+---
+
+- hosts: all
+  become: yes
+  become_user: root
+  become_method: sudo
+  vars:
+    target_user: root
+  tasks:
+
+  - name: Assert key is defined
+    assert:
+      that:
+      - "target_pubkey is defined "
+
+  - name: Push public key
+    authorized_key:
+      user: "{{ target_user }}"
+      state: present
+      key: "{{ target_pubkey }}"
+      manage_dir: False
+
