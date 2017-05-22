@@ -30,6 +30,8 @@ show_config_merged = false
 show_config_parsed = false
 show_config_instances = true
 
+# Determine project root folder
+vagrant_root = File.dirname(__FILE__) + '/'
 
 ########################################
 # Display banner
@@ -162,7 +164,7 @@ conf_default = {
       'type' => 'shell',
       'description' => 'This execute a shell script',
       'params' => {
-        'path' => 'conf/scripts/test_script.sh',
+        'path' => vagrant_root + 'conf/scripts/test_script.sh',
         'args' => [
           'Provisionning',
           'shell_script',
@@ -176,7 +178,7 @@ conf_default = {
       'priority' => '90',
       'description' => 'This will install Python on the target',
       'params' => {
-        'path' => 'conf/scripts/install_python.sh',
+        'path' => vagrant_root + 'conf/scripts/install_python.sh',
         'privileged' => true,
       },
     },
@@ -197,14 +199,14 @@ conf_default = {
       'type' => 'ansible',
       'description' => 'Test Ansible run correctly',
       'params' => {
-        'playbook' => 'conf/ansible/test.yml',
+        'playbook' => vagrant_root + 'conf/ansible/test.yml',
       },
     },
     'ansible_deploy_key' => {
       'type' => 'ansible',
       'description' => 'Deploy an SSH pubkey to specific user',
       'params' => {
-        'playbook' => 'conf/ansible/deploy_key.yml',
+        'playbook' => vagrant_root + 'conf/ansible/deploy_key.yml',
         'extra_vars' => {
           'target_user' => 'root',
         },
@@ -480,13 +482,13 @@ end
 conf_merged = conf_default
 
 # Load mainteneur configuration
-if File.file?('conf/vagrant.yml')
-  conf_merged = merge_recursively(conf_merged, YAML.load_file('conf/vagrant.yml') )
+if File.file?(vagrant_root + 'conf/vagrant.yml')
+  conf_merged = merge_recursively(conf_merged, YAML.load_file(vagrant_root + 'conf/vagrant.yml') )
 end
 
 # Load user configuration
-if File.file?('local.yml')
-  conf_merged = merge_recursively(conf_merged, YAML.load_file('local.yml') )
+if File.file?(vagrant_root + 'local.yml')
+  conf_merged = merge_recursively(conf_merged, YAML.load_file(vagrant_root + 'local.yml') )
 end
 
 # Display configuration if requested
