@@ -800,6 +800,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         # Override
         o.vm.box = conf_final['providers']['libvirt']['boxes'][value["box"]]
 
+        # Connection settings
+        l.host = conf_final['providers']['libvirt']['settings']['host']
+        l.connect_via_ssh = conf_final['providers']['libvirt']['settings']['connect_via_ssh']
+        l.username = conf_final['providers']['libvirt']['settings']['username']
+
       end
     
 
