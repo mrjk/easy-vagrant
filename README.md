@@ -62,7 +62,7 @@ Easy-vagrant is extensively documented. Here is the entry point of the documenta
   * [Install Vagrant and Libvirt](https://www.google.ca/search?q=How+to+install+vagrant+libvirt)
   * Install Vagrant and Docker (comming)
 * Documentation:
-  * [Usage and examples](docs/usage.md)
+  * [Usage and examples](docs/examples)
   * [The ``vagrant.yml`` configuration](docs/configuration.md)
   * [YAML specification](docs/object_definitions.md)
   * [Default configuration](docs/default_configuration.md)
@@ -88,8 +88,8 @@ To let you more time to work on your project than on your development environmen
   - Docker (coming soon)
 - Multi OS support:
   - GNU/Linux
-  - Mac OSX
-  - Windows
+  - Mac OSX (should work)
+  - Windows (should work, but who cares?)
 
 
 ## Compatibility
@@ -117,12 +117,23 @@ If you plan to use with libvirt, you will need the following dependencies:
 See also the list of [contributors](https://github.com/mrjk/vagrant-skel/graphs/contributors) who participated in this project.
 
 
+## Todo
+The software is in beta, but:
+
+- Refactor the code in small pieces, split in files
+- More testing
+- See the plugin approach
+- Implement all other use-cases than mine
+
+
 ## Alternatives
 There are not so many alternatives, but we can mention:
 
 - [Oh-My-Vagrant](https://github.com/purpleidea/oh-my-vagrant) made by James.
 - [vagrantMultiHost](https://github.com/juliangut/vagrantMultiHost ) by Julian Gut.
 - [Vagrant-Up](https://github.com/Mayccoll/Vagrant-Up) by Mayccoll
+- [Plugin: vagrant-dotvm](https://github.com/vagrant-dotvm/plugin)
+- [Plugin: vagrant-yaml](https://github.com/PraxisLabs/vagrant-yaml)
 
 
 ## Acknowledgments
