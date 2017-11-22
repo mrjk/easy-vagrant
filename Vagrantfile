@@ -96,13 +96,14 @@ conf_default = {
       }
     },
     'boxes' => {
-      'debian8' => 'wholebits/debian8-64',
+      'debian9' => 'debian/stretch64',
+      'debian8' => 'debian/jessie64',
       'debian7' => 'wholebits/debian7-64',
       'ubuntu1604' => 'wholebits/ubuntu16.10-64',
       'ubuntu1404' => 'wholebits/ubuntu14.04-64',
-      'centos7' => 'wholebits/centos7',
-      'centos6' => 'wholebits/centos5-64',
-      'archlinux' => 'wholebits/arch-64',
+      'centos7' => 'centos/7',
+      'centos6' => 'centos/6',
+      'archlinux' => 'archlinux/archlinux',
     },
     'providers' => {
       'libvirt' => {
